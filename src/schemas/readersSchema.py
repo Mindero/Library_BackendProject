@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from sqlalchemy import Date
-
+from datetime import date
 
 class ReadersSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -10,4 +9,4 @@ class ReadersSchema(BaseModel):
     email: str
     phone_number: str
     passport: str
-    # created_date: Date
+    created_date: date

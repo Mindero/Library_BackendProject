@@ -3,10 +3,12 @@ from fastapi import APIRouter
 from src.db.postgres.repository.readers_repo import ReadersRepository
 from src.db.postgres.repository.authors_repo import AuthorsRepository
 from src.db.postgres.repository.books_repo import BooksRepository
+from src.db.postgres.repository.genres_repo import GenresRepository
 from src.db.postgres.database import PostgresDatabase
 from src.schemas.readersSchema import ReadersSchema
 from src.schemas.authorsSchema import AuthorsSchema
 from src.schemas.booksSchema import BooksSchema
+from src.schemas.genresSchema import GenresSchema
 
 
 router = APIRouter()
@@ -40,7 +42,18 @@ async def get_all_books() -> list[BooksSchema]:
     database = PostgresDatabase()
 
     async with database.session() as session:
-        await book_repo.get_all_books(session=session)
+        await book_repo.check_connection(session=session)
         all_books = await book_repo.get_all_books(session=session)
 
     return all_books
+
+@router.get("/all_genres", response_model=list[GenresSchema])
+async def get_all_genres() -> list[GenresSchema]:
+    genres_repo = GenresRepository()
+    database = PostgresDatabase()
+
+    async with database.session() as session:
+        await genres_repo.check_connection(session=session)
+        all_genres = await genres_repo.get_all_genres(session=session)
+
+    return all_genres

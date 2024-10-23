@@ -4,9 +4,11 @@ services:
     restart: always
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./scripts/create_schema.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - .env
     user: ${POSTGRES_USER}
+    container_name: db
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:

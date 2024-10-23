@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     POSTGRES_SCHEMA: str = "my_app_schema"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_DB: str = "postgres"
-    POSTGRES_PORT: int = 5432
+    POSTGRES_PORT: int = 5436
     POSTGRES_USER: SecretStr = "postgres"
     POSTGRES_PASSWORD: SecretStr = "postgres"
     POSTGRES_RECONNECT_INTERVAL_SEC: int = 1

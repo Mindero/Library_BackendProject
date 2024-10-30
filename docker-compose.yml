@@ -9,6 +9,8 @@ services:
       - .env
     user: ${POSTGRES_USER}
     container_name: db
+    networks:
+      - app_db_network
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:

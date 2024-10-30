@@ -5,8 +5,8 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from src.core.config import settings
-from src.api.routes import router
+from project.core.config import settings
+from project.api.routes import router
 
 logger = logging.getLogger(__name__)
 

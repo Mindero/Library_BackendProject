@@ -3,10 +3,10 @@ from typing import Type
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
-from src.schemas.booksSchema import BooksSchema
-from src.models.book import Books
+from src.project.schemas.booksSchema import BooksSchema
+from src.project.models.book import Books
 
-from src.core.config import settings
+from src.project.core.config import settings
 
 
 class BooksRepository:

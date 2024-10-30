@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Date
 
-from  src.db.postgres.database import Base
+from src.project.db.postgres.database import Base
 
 class Genres(Base):
     __tablename__ = "genres"

@@ -3,10 +3,10 @@ from typing import Type
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
-from src.schemas.publishersSchema import PublishersSchema
-from src.models.publisher import Publishers
+from src.project.schemas.publishersSchema import PublishersSchema
+from src.project.models.publisher import Publishers
 
-from src.core.config import settings
+from src.project.core.config import settings
 
 
 class PublishersRepository:

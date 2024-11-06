@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Date
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.project.db.postgres.database import Base
+
 
 class Readers(Base):
     __tablename__ = "readers"

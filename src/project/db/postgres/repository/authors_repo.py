@@ -1,20 +1,19 @@
 from typing import Type
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
-
-from src.project.schemas.authorsSchema import AuthorsSchema
-from src.project.models.author import Authors
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.core.config import settings
+from src.project.models.author import Authors
+from src.project.schemas.authorsSchema import AuthorsSchema
 
 
 class AuthorsRepository:
     _collection: Type[Authors] = Authors
 
     async def check_connection(
-        self,
-        session: AsyncSession,
+            self,
+            session: AsyncSession,
     ) -> bool:
         query = "select 1;"
 
@@ -23,8 +22,8 @@ class AuthorsRepository:
         return True if result else False
 
     async def get_all_authors(
-        self,
-        session: AsyncSession,
+            self,
+            session: AsyncSession,
     ) -> list[AuthorsSchema]:
         query = f"select * from {settings.POSTGRES_SCHEMA}.authors;"
 

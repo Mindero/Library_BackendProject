@@ -1,12 +1,9 @@
-from datetime import date
-
 from pydantic import BaseModel, ConfigDict
 
 
-class AuthorsSchema(BaseModel):
+class AuthorsBookSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    id_authors_book: int
+    id_book: int
     id_author: int
-    name: str
-    country: str
-    birthday: date

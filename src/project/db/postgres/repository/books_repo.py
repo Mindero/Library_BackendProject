@@ -1,20 +1,19 @@
 from typing import Type
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
-
-from src.project.schemas.booksSchema import BooksSchema
-from src.project.models.book import Books
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.core.config import settings
+from src.project.models.book import Books
+from src.project.schemas.booksSchema import BooksSchema
 
 
 class BooksRepository:
     _collection: Type[Books] = Books
 
     async def check_connection(
-        self,
-        session: AsyncSession,
+            self,
+            session: AsyncSession,
     ) -> bool:
         query = "select 1;"
 
@@ -23,8 +22,8 @@ class BooksRepository:
         return True if result else False
 
     async def get_all_books(
-        self,
-        session: AsyncSession,
+            self,
+            session: AsyncSession,
     ) -> list[BooksSchema]:
         query = f"select * from {settings.POSTGRES_SCHEMA}.books;"
 

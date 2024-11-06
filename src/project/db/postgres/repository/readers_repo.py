@@ -1,20 +1,19 @@
 from typing import Type
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
-
-from src.project.schemas.readersSchema import ReadersSchema
-from src.project.models.reader import Readers
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.core.config import settings
+from src.project.models.reader import Readers
+from src.project.schemas.readersSchema import ReadersSchema
 
 
 class ReadersRepository:
     _collection: Type[Readers] = Readers
 
     async def check_connection(
-        self,
-        session: AsyncSession,
+            self,
+            session: AsyncSession,
     ) -> bool:
         query = "select 1;"
 
@@ -23,8 +22,8 @@ class ReadersRepository:
         return True if result else False
 
     async def get_all_readers(
-        self,
-        session: AsyncSession,
+            self,
+            session: AsyncSession,
     ) -> list[ReadersSchema]:
         query = f"select * from {settings.POSTGRES_SCHEMA}.readers;"
 

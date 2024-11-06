@@ -3,10 +3,9 @@ from datetime import date
 from pydantic import BaseModel, ConfigDict
 
 
-class AuthorsSchema(BaseModel):
+class PenaltySchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id_author: int
-    name: str
-    country: str
-    birthday: date
+    id_book_reader: int
+    start_time: date
+    payment: int

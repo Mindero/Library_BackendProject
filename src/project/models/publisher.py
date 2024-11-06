@@ -10,4 +10,3 @@ class Publishers(Base):
     name: Mapped[str] = mapped_column(nullable=False)
     inn: Mapped[str] = mapped_column(nullable=False)
     country: Mapped[str] = mapped_column(nullable=False)
-

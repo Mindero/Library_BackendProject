@@ -6,7 +6,10 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from project.core.config import settings
-from project.api.routes import router
+from project.api import authors
+from project.api import readers
+from project.api import genres
+from project.api import publishers
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +32,10 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    app.include_router(router, prefix="/api", tags=["Reader APIs"])
+    app.include_router(authors.router, prefix="/api/authors", tags=["Authors APIs"])
+    app.include_router(readers.router, prefix="/api/readers", tags=["Readers APIs"])
+    app.include_router(publishers.router, prefix="/api/publishers", tags=["Publishers APIs"])
+    app.include_router(genres.router, prefix="/api/genres", tags=["Genres APIs"])
 
     return app
 

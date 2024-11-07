@@ -3,3 +3,9 @@ from .book import Books
 from .genre import Genres
 from .publisher import Publishers
 from .reader import Readers
+from .penalty import Penalty
+from .bookReader import BookReader
+from .bookPublisher import BookPublisher
+from .bookInstance import BookInstance
+from .bookGenres import BookGenres
+from .authorsBook import AuthorsBook

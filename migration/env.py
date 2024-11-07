@@ -1,16 +1,17 @@
 import asyncio
 import logging
 
-# init metadata
-from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
-from sqlalchemy.ext.declarative import declarative_base
 from tenacity import before_sleep_log, retry, wait_exponential
+
+# init metadata
+from alembic import context
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 from src.project.core.config import settings
+from src.project.db.postgres.database import metadata
 from src.project.models import *  # noqa
 
 CREATE_SCHEMA_QUERY = f"CREATE SCHEMA IF NOT EXISTS {settings.POSTGRES_SCHEMA};"
@@ -23,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-Base = declarative_base()
-target_metadata = Base.metadata
-# target_metadata = metadata
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
+target_metadata = metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

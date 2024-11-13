@@ -8,5 +8,5 @@ class Publishers(Base):
 
     id_publisher: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(nullable=False)
-    inn: Mapped[str] = mapped_column(nullable=False)
+    inn: Mapped[str] = mapped_column(nullable=False, unique=True)
     country: Mapped[str] = mapped_column(nullable=False)

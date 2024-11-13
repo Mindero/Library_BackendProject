@@ -1,9 +1,12 @@
 from pydantic import BaseModel, ConfigDict
 
 
-class BooksSchema(BaseModel):
+class BookCreateUpdateSchema(BaseModel):
+    name: str
+    year: int
+
+
+class BookSchema(BookCreateUpdateSchema):
     model_config = ConfigDict(from_attributes=True)
 
     id_book: int
-    name: str
-    year: int

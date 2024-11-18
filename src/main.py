@@ -11,11 +11,11 @@ from project.api import bookGenres
 from project.api import bookInstance
 from project.api import bookPublisher
 from project.api import bookReader
+from project.api import books
 from project.api import genres
 from project.api import penalty
 from project.api import publishers
 from project.api import readers
-from project.api import books
 from project.core.config import settings
 
 logger = logging.getLogger(__name__)

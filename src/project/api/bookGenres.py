@@ -1,8 +1,8 @@
-from fastapi import APIRouter, status,HTTPException
+from fastapi import APIRouter, status, HTTPException
 
-from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema
 from src.project.api.depends import database, book_genres_repo
 from src.project.core.exceptions.BookGenresExceptions import BookGenresNotFound
+from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema
 
 router = APIRouter()
 

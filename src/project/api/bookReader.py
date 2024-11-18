@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, HTTPException
 
-from src.project.schemas.bookReaderSchema import BookReaderSchema, BookReaderCreateUpdateSchema
 from src.project.api.depends import database, bookReader_repo
 from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
+from src.project.schemas.bookReaderSchema import BookReaderSchema, BookReaderCreateUpdateSchema
 
 router = APIRouter()
 

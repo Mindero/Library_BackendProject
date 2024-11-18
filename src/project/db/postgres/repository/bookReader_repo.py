@@ -1,12 +1,13 @@
 from typing import Type
 
-from sqlalchemy import text, select, update, delete
+from sqlalchemy import text, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.core.config import settings
+from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
 from src.project.models.bookReader import BookReader
 from src.project.schemas.bookReaderSchema import BookReaderSchema, BookReaderCreateUpdateSchema
-from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
+
 
 class BookReaderRepository:
     _collection: Type[BookReader] = BookReader

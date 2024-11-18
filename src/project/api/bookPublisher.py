@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, HTTPException
 
-from src.project.schemas.bookPublisherSchema import BookPublisherSchema, BookPublisherCreateUpdateSchema
 from src.project.api.depends import database, bookPublisher_repo
 from src.project.core.exceptions.BookPublisherExceptions import BookPublisherNotFound
+from src.project.schemas.bookPublisherSchema import BookPublisherSchema, BookPublisherCreateUpdateSchema
 
 router = APIRouter()
 
@@ -22,7 +22,8 @@ async def add_bookPublisher(
 ) -> BookPublisherSchema:
     try:
         async with database.session() as session:
-            new_bookPublisher = await bookPublisher_repo.create_bookPublisher(session=session, bookPublisher=bookPublisher_dto)
+            new_bookPublisher = await bookPublisher_repo.create_bookPublisher(session=session,
+                                                                              bookPublisher=bookPublisher_dto)
     except BookPublisherNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
@@ -57,7 +58,8 @@ async def delete_bookPublisher(
 ) -> None:
     try:
         async with database.session() as session:
-            bookPublisher = await bookPublisher_repo.delete_bookPublisher(session=session, bookPublisher_id=bookPublisher_id)
+            bookPublisher = await bookPublisher_repo.delete_bookPublisher(session=session,
+                                                                          bookPublisher_id=bookPublisher_id)
     except BookPublisherNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
 

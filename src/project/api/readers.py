@@ -1,9 +1,9 @@
 from fastapi import APIRouter, status, HTTPException
 
-from src.project.db.postgres.database import PostgresDatabase
-from src.project.schemas.readerSchema import ReaderSchema, ReaderCreateUpdateSchema
-from src.project.core.exceptions.ReaderExceptions import ReaderAlreadyExists,ReaderNotFound
 from src.project.api.depends import database, reader_repo
+from src.project.core.exceptions.ReaderExceptions import ReaderNotFound
+from src.project.schemas.readerSchema import ReaderSchema, ReaderCreateUpdateSchema
+
 router = APIRouter()
 
 

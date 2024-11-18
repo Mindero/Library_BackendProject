@@ -1,13 +1,13 @@
 from typing import Type
 
 from sqlalchemy import text, insert, update, delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.project.core.config import settings
+from src.project.core.exceptions.GenreExceptions import GenreAlreadyExists, GenreNotFound
 from src.project.models.genre import Genres
 from src.project.schemas.genreSchema import GenreSchema, GenreCreateUpdateSchema
-from src.project.core.exceptions.GenreExceptions import GenreAlreadyExists, GenreNotFound
+
 
 class GenreRepository:
     _collection: Type[Genres] = Genres

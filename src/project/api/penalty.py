@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
-from src.project.schemas.penaltySchema import PenaltySchema, PenaltyCreateUpdateSchema
 from src.project.api.depends import database, penalty_repo
 from src.project.core.exceptions.PenaltyExceptions import PenaltyNotFound
+from src.project.schemas.penaltySchema import PenaltySchema, PenaltyCreateUpdateSchema
 
 router = APIRouter()
 

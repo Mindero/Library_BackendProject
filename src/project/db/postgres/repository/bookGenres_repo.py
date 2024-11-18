@@ -1,12 +1,12 @@
 from typing import Type
 
-from sqlalchemy import text, insert,update,delete, select
+from sqlalchemy import text, insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.project.core.config import settings
+from src.project.core.exceptions.BookGenresExceptions import BookGenresNotFound
 from src.project.models.bookGenres import BookGenres
 from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema
-from src.project.core.exceptions.BookGenresExceptions import BookGenresNotFound
+
 
 class BookGenresRepository:
     _collection: Type[BookGenres] = BookGenres

@@ -3,10 +3,10 @@ from typing import Type
 from sqlalchemy import text, insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.project.core.config import settings
+from src.project.core.exceptions.PenaltyExceptions import PenaltyNotFound
 from src.project.models.penalty import Penalty
 from src.project.schemas.penaltySchema import PenaltySchema, PenaltyCreateUpdateSchema
-from src.project.core.exceptions.PenaltyExceptions import PenaltyNotFound
+
 
 class PenaltyRepository:
     _collection: Type[Penalty] = Penalty

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
-from src.project.schemas.authorSchema import AuthorSchema, AuthorCreateUpdateSchema
 from src.project.api.depends import database, author_repo
 from src.project.core.exceptions.AuthorExceptions import AuthorNotFound
+from src.project.schemas.authorSchema import AuthorSchema, AuthorCreateUpdateSchema
 
 router = APIRouter()
 

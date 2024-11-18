@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from src.project.db.postgres.database import Base
 

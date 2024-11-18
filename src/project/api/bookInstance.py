@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
-from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
 from src.project.api.depends import database, bookInstance_repo
 from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
+from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
 
 router = APIRouter()
 
@@ -22,7 +22,8 @@ async def add_bookInstance(
 ) -> BookInstanceSchema:
     try:
         async with database.session() as session:
-            new_bookInstance = await bookInstance_repo.create_bookInstance(session=session, bookInstance=bookInstance_dto)
+            new_bookInstance = await bookInstance_repo.create_bookInstance(session=session,
+                                                                           bookInstance=bookInstance_dto)
     except BookInstanceNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 

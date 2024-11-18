@@ -1,8 +1,8 @@
 from fastapi import APIRouter, status, HTTPException
 
-from src.project.schemas.publisherSchema import PublisherSchema, PublisherCreateUpdateSchema
 from src.project.api.depends import database, publisher_repo
 from src.project.core.exceptions.PublisherException import PublisherAlreadyExists, PublisherNotFound
+from src.project.schemas.publisherSchema import PublisherSchema, PublisherCreateUpdateSchema
 
 router = APIRouter()
 

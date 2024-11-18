@@ -1,12 +1,13 @@
 from typing import Type
 
 from sqlalchemy import text, insert, select, delete, update
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from src.project.core.config import settings
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.project.core.exceptions.PublisherException import PublisherAlreadyExists, PublisherNotFound
 from src.project.models.publisher import Publishers
 from src.project.schemas.publisherSchema import PublisherSchema, PublisherCreateUpdateSchema
-from src.project.core.exceptions.PublisherException import PublisherAlreadyExists, PublisherNotFound
+
 
 class PublishersRepository:
     _collection: Type[Publishers] = Publishers

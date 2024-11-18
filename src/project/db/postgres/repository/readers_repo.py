@@ -1,13 +1,12 @@
 from typing import Type
 
 from sqlalchemy import text, insert, update, delete, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.project.core.config import settings
+from src.project.core.exceptions.ReaderExceptions import ReaderAlreadyExists, ReaderNotFound
 from src.project.models.reader import Readers
 from src.project.schemas.readerSchema import ReaderSchema, ReaderCreateUpdateSchema
-from src.project.core.exceptions.ReaderExceptions import ReaderAlreadyExists, ReaderNotFound
 
 
 class ReadersRepository:

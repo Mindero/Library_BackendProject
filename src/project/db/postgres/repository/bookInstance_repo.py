@@ -3,10 +3,10 @@ from typing import Type
 from sqlalchemy import text, insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.project.core.config import settings
+from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
 from src.project.models.bookInstance import BookInstance
 from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
-from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
+
 
 class BookInstanceRepository:
     _collection: Type[BookInstance] = BookInstance

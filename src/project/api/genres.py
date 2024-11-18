@@ -1,9 +1,8 @@
-from fastapi import APIRouter, status,HTTPException
+from fastapi import APIRouter, status, HTTPException
 
-from src.project.schemas.genreSchema import GenreSchema,GenreCreateUpdateSchema
-from src.project.api.depends import database,genre_repo
+from src.project.api.depends import database, genre_repo
 from src.project.core.exceptions.GenreExceptions import GenreAlreadyExists, GenreNotFound
-
+from src.project.schemas.genreSchema import GenreSchema, GenreCreateUpdateSchema
 
 router = APIRouter()
 

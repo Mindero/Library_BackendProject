@@ -9,6 +9,7 @@ class BookReaderCreateUpdateSchema(BaseModel):
     borrow_date: date
     end_date: date
 
+
 class BookReaderSchema(BookReaderCreateUpdateSchema):
     model_config = ConfigDict(from_attributes=True)
 

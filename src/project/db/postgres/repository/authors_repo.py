@@ -11,16 +11,6 @@ from src.project.schemas.authorSchema import AuthorSchema, AuthorCreateUpdateSch
 class AuthorsRepository:
     _collection: Type[Authors] = Authors
 
-    async def check_connection(
-            self,
-            session: AsyncSession,
-    ) -> bool:
-        query = "select 1;"
-
-        result = await session.scalar(text(query))
-
-        return True if result else False
-
     async def get_all_authors(
             self,
             session: AsyncSession,
@@ -78,3 +68,17 @@ class AuthorsRepository:
 
         if not result.rowcount:
             raise AuthorNotFound(_id=author_id)
+
+    async def get_by_id(
+            self,
+            session: AsyncSession,
+            author_id: int
+    ) -> AuthorSchema:
+        query = select(self._collection).where(self._collection.id_author == author_id)
+
+        result = await session.scalar(query)
+
+        if not result:
+            raise AuthorNotFound(_id=author_id)
+
+        return AuthorSchema.model_validate(obj=result)

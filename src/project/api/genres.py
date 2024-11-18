@@ -16,6 +16,16 @@ async def get_all_genres() -> list[GenreSchema]:
     return all_genres
 
 
+@router.get("/{genre_id}", response_model=GenreSchema)
+async def get_genres_by_id(genre_id: int) -> GenreSchema:
+    try:
+        async with database.session() as session:
+            genres = await genre_repo.get_by_id(session=session, genre_id=genre_id)
+    except GenreNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return genres
+
+
 @router.post("/add_genre", response_model=GenreSchema, status_code=status.HTTP_201_CREATED)
 async def add_genre(
         genre_dto: GenreCreateUpdateSchema,

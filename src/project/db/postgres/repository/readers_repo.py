@@ -32,6 +32,22 @@ class ReadersRepository:
 
         return [ReaderSchema.model_validate(obj=readers) for readers in readers.all()]
 
+
+    async def get_by_id(
+            self,
+            session: AsyncSession,
+            reader_id: int
+    ) -> ReaderSchema:
+        query = select(self._collection).where(self._collection.reader_ticket == reader_id)
+
+        result = await session.scalar(query)
+
+        if not result:
+            raise ReaderNotFound(_id=reader_id)
+
+        return ReaderSchema.model_validate(obj=result)
+
+
     async def create_reader(
             self,
             session: AsyncSession,

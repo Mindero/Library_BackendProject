@@ -16,6 +16,16 @@ async def get_all_book_instance() -> list[BookInstanceSchema]:
     return all_book_instance
 
 
+@router.get("/{bookInstance_id}", response_model=BookInstanceSchema)
+async def get_bookInstance_by_id(bookInstance_id: int) -> BookInstanceSchema:
+    try:
+        async with database.session() as session:
+            bookInstance = await bookInstance_repo.get_by_id(session=session, bookInstance_id=bookInstance_id)
+    except BookInstanceNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return bookInstance
+
+
 @router.post("/add_bookInstance", response_model=BookInstanceSchema, status_code=status.HTTP_201_CREATED)
 async def add_bookInstance(
         bookInstance_dto: BookInstanceCreateUpdateSchema,

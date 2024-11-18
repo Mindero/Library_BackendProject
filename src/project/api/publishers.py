@@ -16,6 +16,16 @@ async def get_all_publishers() -> list[PublisherSchema]:
     return all_publishers
 
 
+@router.get("/{publisher_id}", response_model=PublisherSchema)
+async def get_publisher_by_id(publisher_id: int) -> PublisherSchema:
+    try:
+        async with database.session() as session:
+            publisher = await publisher_repo.get_by_id(session=session, bookPublisher_id=publisher_id)
+    except PublisherNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return publisher
+
+
 @router.post("/add_publisher", response_model=PublisherSchema, status_code=status.HTTP_201_CREATED)
 async def add_publisher(
         publisher_dto: PublisherCreateUpdateSchema,

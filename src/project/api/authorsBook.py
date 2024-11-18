@@ -11,9 +11,19 @@ router = APIRouter()
 async def get_all_authorsBook() -> list[AuthorsBookSchema]:
     async with database.session() as session:
         await authorsBook_repo.check_connection(session=session)
-        all_authorsBook = await authorsBook_repo.get_all_authorsBook(session=session)
+        all_authorsBook = await authorsBook_repo.get_all_authorsBooks(session=session)
 
     return all_authorsBook
+
+
+@router.get("/{authors_book_id}", response_model=AuthorsBookSchema)
+async def get_authorBook_by_id(authors_book_id: int) -> AuthorsBookSchema:
+    try:
+        async with database.session() as session:
+            authorBook = await authorsBook_repo.get_by_id(session=session, authors_book_id=authors_book_id)
+    except AuthorsBookNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return authorBook
 
 
 @router.post("/add_authorBook", response_model=AuthorsBookSchema, status_code=status.HTTP_201_CREATED)
@@ -22,7 +32,7 @@ async def add_authorBook(
 ) -> AuthorsBookSchema:
     try:
         async with database.session() as session:
-            new_authorBook = await authorsBook_repo.create_author(session=session, authorsBook=author_dto)
+            new_authorBook = await authorsBook_repo.create_authorsBook(session=session, authorsBook=author_dto)
     except AuthorsBookNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 

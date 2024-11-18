@@ -16,6 +16,16 @@ async def get_all_book_genres() -> list[BookGenresSchema]:
     return all_book_genres
 
 
+@router.get("/{bookGenres_id}", response_model=BookGenresSchema)
+async def get_bookGenres_by_id(bookGenres_id: int) -> BookGenresSchema:
+    try:
+        async with database.session() as session:
+            bookGenres = await book_genres_repo.get_by_id(session=session, bookGenres_id=bookGenres_id)
+    except BookGenresNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return bookGenres
+
+
 @router.post("/add_bookGenres", response_model=BookGenresSchema, status_code=status.HTTP_201_CREATED)
 async def add_bookGenres(
         bookGenres_dto: BookGenresCreateUpdateSchema,

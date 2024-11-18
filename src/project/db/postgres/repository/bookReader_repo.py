@@ -1,6 +1,6 @@
 from typing import Type
 
-from sqlalchemy import text, update, delete
+from sqlalchemy import text, update, delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.core.config import settings
@@ -31,6 +31,20 @@ class BookReaderRepository:
         bookReader = await session.execute(text(query))
 
         return [BookReaderSchema.model_validate(obj=val) for val in bookReader.mappings().all()]
+
+    async def get_by_id(
+            self,
+            session: AsyncSession,
+            bookReader_id: int
+    ) -> BookReaderSchema:
+        query = select(self._collection).where(self._collection.id_book_reader == bookReader_id)
+
+        result = await session.scalar(query)
+
+        if not result:
+            raise BookReaderNotFound(_id=bookReader_id)
+
+        return BookReaderSchema.model_validate(obj=result)
 
     async def create_bookReader(
             self,

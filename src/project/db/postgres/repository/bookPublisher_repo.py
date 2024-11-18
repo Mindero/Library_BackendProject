@@ -31,6 +31,20 @@ class BookPublisherRepository:
 
         return [BookPublisherSchema.model_validate(obj=val) for val in bookPublisher.all()]
 
+    async def get_by_id(
+            self,
+            session: AsyncSession,
+            bookPublisher_id: int
+    ) -> BookPublisherSchema:
+        query = select(self._collection).where(self._collection.id_book_publisher == bookPublisher_id)
+
+        result = await session.scalar(query)
+
+        if not result:
+            raise BookPublisherNotFound(_id=bookPublisher_id)
+
+        return BookPublisherSchema.model_validate(obj=result)
+
     async def create_bookPublisher(
             self,
             session: AsyncSession,

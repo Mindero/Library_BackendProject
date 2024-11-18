@@ -10,10 +10,19 @@ router = APIRouter()
 @router.get("/all_authors", response_model=list[AuthorSchema])
 async def get_all_authors() -> list[AuthorSchema]:
     async with database.session() as session:
-        await author_repo.check_connection(session=session)
         all_author = await author_repo.get_all_authors(session=session)
 
     return all_author
+
+
+@router.get("/{author_id}", response_model=AuthorSchema)
+async def get_author_by_id(author_id: int) -> AuthorSchema:
+    try:
+        async with database.session() as session:
+            author = await author_repo.get_by_id(session=session, bookPublisher_id=author_id)
+    except AuthorNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return author
 
 
 @router.post("/add_author", response_model=AuthorSchema, status_code=status.HTTP_201_CREATED)

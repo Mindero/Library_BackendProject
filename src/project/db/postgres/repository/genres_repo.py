@@ -32,6 +32,20 @@ class GenreRepository:
 
         return [GenreSchema.model_validate(obj=genre) for genre in genre.all()]
 
+    async def get_by_id(
+            self,
+            session: AsyncSession,
+            genre_id: int
+    ) -> GenreSchema:
+        query = select(self._collection).where(self._collection.id_genre == genre_id)
+
+        result = await session.scalar(query)
+
+        if not result:
+            raise GenreNotFound(_id=genre_id)
+
+        return GenreSchema.model_validate(obj=result)
+
     async def create_genre(
             self,
             session: AsyncSession,

@@ -31,6 +31,20 @@ class BookGenresRepository:
 
         return [BookGenresSchema.model_validate(obj=val) for val in bookGenres.all()]
 
+    async def get_by_id(
+            self,
+            session: AsyncSession,
+            bookGenres_id: int
+    ) -> BookGenresSchema:
+        query = select(self._collection).where(self._collection.id_book_genres == bookGenres_id)
+
+        result = await session.scalar(query)
+
+        if not result:
+            raise BookGenresNotFound(_id=bookGenres_id)
+
+        return BookGenresSchema.model_validate(obj=result)
+
     async def create_bookGenres(
             self,
             session: AsyncSession,

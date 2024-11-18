@@ -29,6 +29,16 @@ async def add_book(
     return new_book
 
 
+@router.get("/{book_id}", response_model=BookSchema)
+async def get_book_by_id(book_id: int) -> BookSchema:
+    try:
+        async with database.session() as session:
+            book = await book_repo.get_by_id(session=session, book_id=book_id)
+    except BookNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return book
+
+
 @router.put(
     "/update_book/{book_id}",
     response_model=BookSchema,

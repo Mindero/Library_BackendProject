@@ -31,6 +31,20 @@ class BooksRepository:
 
         return [BookSchema.model_validate(obj=book) for book in books.all()]
 
+    async def get_by_id(
+            self,
+            session: AsyncSession,
+            book_id: int
+    ) -> BookSchema:
+        query = select(self._collection).where(self._collection.id_book == book_id)
+
+        result = await session.scalar(query)
+
+        if not result:
+            raise BookNotFound(_id=book_id)
+
+        return BookSchema.model_validate(obj=result)
+
     async def create_book(
             self,
             session: AsyncSession,

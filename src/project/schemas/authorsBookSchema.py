@@ -1,9 +1,9 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class AuthorsBookCreateUpdateSchema(BaseModel):
-    id_book: int | None = Field(default=None)
-    id_author: int | None = Field(default=None)
+    id_book: int
+    id_author: int
 
 
 class AuthorsBookSchema(AuthorsBookCreateUpdateSchema):

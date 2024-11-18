@@ -16,6 +16,16 @@ async def get_all_readers() -> list[ReaderSchema]:
     return all_readers
 
 
+@router.get("/{reader_id}", response_model=ReaderSchema)
+async def get_reader_by_id(reader_id: int) -> ReaderSchema:
+    try:
+        async with database.session() as session:
+            reader = await reader_repo.get_by_id(session=session, reader_id=reader_id)
+    except ReaderNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return reader
+
+
 @router.post("/add_reader", response_model=ReaderSchema, status_code=status.HTTP_201_CREATED)
 async def add_reader(
         reader_dto: ReaderCreateUpdateSchema,

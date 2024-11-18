@@ -16,6 +16,16 @@ async def get_all_penalty() -> list[PenaltySchema]:
     return all_penalty
 
 
+@router.get("/{penalty_id}", response_model=PenaltySchema)
+async def get_penalty_by_id(penalty_id: int) -> PenaltySchema:
+    try:
+        async with database.session() as session:
+            penalty = await penalty_repo.get_by_id(session=session, penalty_id=penalty_id)
+    except PenaltyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return penalty
+
+
 @router.post("/add_penalty", response_model=PenaltySchema, status_code=status.HTTP_201_CREATED)
 async def add_penalty(
         penalty_dto: PenaltyCreateUpdateSchema,

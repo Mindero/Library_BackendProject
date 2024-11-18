@@ -31,6 +31,20 @@ class PenaltyRepository:
 
         return [PenaltySchema.model_validate(obj=val) for val in penalty.all()]
 
+    async def get_by_id(
+            self,
+            session: AsyncSession,
+            penalty_id: int
+    ) -> PenaltySchema:
+        query = select(self._collection).where(self._collection.id_book_reader == penalty_id)
+
+        result = await session.scalar(query)
+
+        if not result:
+            raise PenaltyNotFound(_id=penalty_id)
+
+        return PenaltySchema.model_validate(obj=result)
+
     async def create_penalty(
             self,
             session: AsyncSession,

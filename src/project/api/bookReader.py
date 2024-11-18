@@ -16,6 +16,16 @@ async def get_all_book_reader() -> list[BookReaderSchema]:
     return all_book_reader
 
 
+@router.get("/{bookReader_id}", response_model=BookReaderSchema)
+async def get_bookReader_by_id(bookReader_id: int) -> BookReaderSchema:
+    try:
+        async with database.session() as session:
+            bookReader = await bookReader_repo.get_by_id(session=session, bookReader_id=bookReader_id)
+    except BookReaderNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return bookReader
+
+
 @router.post("/add_bookReader", response_model=BookReaderSchema, status_code=status.HTTP_201_CREATED)
 async def add_bookReader(
         bookReader_dto: BookReaderCreateUpdateSchema,

@@ -32,6 +32,20 @@ class PublishersRepository:
 
         return [PublisherSchema.model_validate(obj=publisher) for publisher in publishers.all()]
 
+    async def get_by_id(
+            self,
+            session: AsyncSession,
+            publisher_id: int
+    ) -> PublisherSchema:
+        query = select(self._collection).where(self._collection.id_publisher == publisher_id)
+
+        result = await session.scalar(query)
+
+        if not result:
+            raise PublisherNotFound(_id=publisher_id)
+
+        return PublisherSchema.model_validate(obj=result)
+
     async def create_publisher(
             self,
             session: AsyncSession,

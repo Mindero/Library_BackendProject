@@ -13,6 +13,6 @@ class GenreNotFound(BaseException):
 class GenreAlreadyExists(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Жанр с именем '{inn}' уже существует"
 
-    def __init__(self, inn: str) -> None:
-        self.message = self._ERROR_MESSAGE_TEMPLATE.format(inn=inn)
+    def __init__(self, name: str) -> None:
+        self.message = self._ERROR_MESSAGE_TEMPLATE.format(inn=name)
         super().__init__(self.message)

@@ -55,7 +55,7 @@ class PenaltyRepository:
     ) -> PenaltySchema:
         query = (
             update(self._collection)
-            .where(self._collection.id_authors_book == penalty_id)
+            .where(self._collection.id_book_reader == penalty_id)
             .values(penalty.model_dump())
             .returning(self._collection)
         )
@@ -72,7 +72,7 @@ class PenaltyRepository:
             session: AsyncSession,
             penalty_id: int
     ) -> None:
-        query = delete(self._collection).where(self._collection.id_authors_book == penalty_id)
+        query = delete(self._collection).where(self._collection.id_book_reader == penalty_id)
 
         result = await session.execute(query)
 

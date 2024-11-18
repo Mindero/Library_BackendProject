@@ -43,6 +43,9 @@ class AuthorsBooksRepository:
         )
 
         created_authorsBook = await session.scalar(query)
+
+        if not created_authorsBook:
+            raise
         await session.commit()
 
         return AuthorsBookSchema.model_validate(obj=created_authorsBook)

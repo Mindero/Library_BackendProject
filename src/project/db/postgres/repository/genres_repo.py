@@ -43,8 +43,11 @@ class GenreRepository:
             .returning(self._collection)
         )
 
-        created_genre = await session.scalar(query)
-        await session.commit()
+        try:
+            created_genre = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise GenreAlreadyExists(name=genre.name)
 
         return GenreSchema.model_validate(obj=created_genre)
 
@@ -65,7 +68,7 @@ class GenreRepository:
             updated_genre = await session.scalar(query)
             await session.commit()
         except IntegrityError:
-            raise GenreAlreadyExists(inn=genre.name)
+            raise GenreAlreadyExists(name=genre.name)
 
         return GenreSchema.model_validate(obj=updated_genre)
 

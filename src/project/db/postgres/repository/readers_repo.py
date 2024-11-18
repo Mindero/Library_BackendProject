@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from src.project.core.config import settings
 from src.project.models.reader import Readers
 from src.project.schemas.readerSchema import ReaderSchema, ReaderCreateUpdateSchema
-from src.project.core.exceptions.ReaderExceptions import ReaderAlreadyExists,ReaderNotFound
+from src.project.core.exceptions.ReaderExceptions import ReaderAlreadyExists, ReaderNotFound
 
 
 class ReadersRepository:
@@ -52,9 +52,9 @@ class ReadersRepository:
             if 'email' in error_field:
                 raise ReaderAlreadyExists.emailExists(email=reader.email)
             elif 'phone_number' in error_field:
-                raise ReaderAlreadyExists.phoneNumberExists(phone_number = reader.phone_number)
+                raise ReaderAlreadyExists.phoneNumberExists(phone_number=reader.phone_number)
             elif 'passport' in error_field:
-                raise ReaderAlreadyExists.passportExists(passport = reader.passport)
+                raise ReaderAlreadyExists.passportExists(passport=reader.passport)
 
         return ReaderSchema.model_validate(obj=created_reader)
 

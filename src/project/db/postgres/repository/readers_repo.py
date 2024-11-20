@@ -63,13 +63,7 @@ class ReadersRepository:
             created_reader = await session.scalar(query)
             await session.commit()
         except IntegrityError as e:
-            error_field = str(e.orig)
-            if 'email' in error_field:
-                raise ReaderAlreadyExists.emailExists(email=reader.email)
-            elif 'phone_number' in error_field:
-                raise ReaderAlreadyExists.phoneNumberExists(phone_number=reader.phone_number)
-            elif 'passport' in error_field:
-                raise ReaderAlreadyExists.passportExists(passport=reader.passport)
+            raise ReaderAlreadyExists()
 
         return ReaderSchema.model_validate(obj=created_reader)
 

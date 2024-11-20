@@ -1,4 +1,5 @@
 from typing import Final
+from src.project.models.reader import Readers
 
 
 class ReaderNotFound(BaseException):
@@ -12,20 +13,5 @@ class ReaderNotFound(BaseException):
 
 class ReaderAlreadyExists(BaseException):
 
-    def __init__(self, msg: str) -> None:
-        super().__init__(self.message)
-
-    @staticmethod
-    def emailExists(email: str) -> "ReaderAlreadyExists":
-        message = f"Читатель с почтой '{email}' уже существует"
-        return ReaderAlreadyExists(msg=message)
-
-    @staticmethod
-    def phoneNumberExists(phone_number: str) -> "ReaderAlreadyExists":
-        message = f"Читатель с телефоном '{phone_number}' уже существует"
-        return ReaderAlreadyExists(msg=message)
-
-    @staticmethod
-    def passportExists(passport: str) -> "ReaderAlreadyExists":
-        message = f"Читатель с паспортом '{passport}' уже существует"
-        return ReaderAlreadyExists(msg=message)
+    def __init__(self) -> None:
+        super().__init__(f"Ошибка при вставке в таблицу {Readers.__tablename__} одного из полей уже существует")

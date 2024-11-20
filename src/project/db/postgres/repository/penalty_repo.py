@@ -2,8 +2,10 @@ from typing import Type
 
 from sqlalchemy import text, insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.PenaltyExceptions import PenaltyNotFound
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 from src.project.models.penalty import Penalty
 from src.project.schemas.penaltySchema import PenaltySchema, PenaltyCreateUpdateSchema
 
@@ -55,9 +57,11 @@ class PenaltyRepository:
             .values(penalty.model_dump())
             .returning(self._collection)
         )
-
-        created_penalty = await session.scalar(query)
-        await session.commit()
+        try:
+            created_penalty = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound("penalty")
 
         return PenaltySchema.model_validate(obj=created_penalty)
 
@@ -74,7 +78,11 @@ class PenaltyRepository:
             .returning(self._collection)
         )
 
-        updated_penalty = await session.scalar(query)
+        try:
+            updated_penalty = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound("penalty")
 
         if not updated_penalty:
             raise PenaltyNotFound(_id=penalty_id)

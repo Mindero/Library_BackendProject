@@ -3,6 +3,7 @@ from fastapi import APIRouter, status, HTTPException
 from src.project.api.depends import database, bookReader_repo
 from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
 from src.project.schemas.bookReaderSchema import BookReaderSchema, BookReaderCreateUpdateSchema
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 
 router = APIRouter()
 
@@ -35,6 +36,8 @@ async def add_bookReader(
             new_bookReader = await bookReader_repo.create_bookReader(session=session, bookReader=bookReader_dto)
     except BookReaderNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return new_bookReader
 
@@ -57,6 +60,8 @@ async def update_bookReader(
             )
     except BookReaderNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return updated_bookReader
 

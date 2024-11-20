@@ -2,8 +2,10 @@ from typing import Type
 
 from sqlalchemy import text, insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.BookGenresExceptions import BookGenresNotFound
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 from src.project.models.bookGenres import BookGenres
 from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema
 
@@ -56,8 +58,11 @@ class BookGenresRepository:
             .returning(self._collection)
         )
 
-        created_bookGenres = await session.scalar(query)
-        await session.commit()
+        try:
+            created_bookGenres = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound("book_genres")
 
         return BookGenresSchema.model_validate(obj=created_bookGenres)
 
@@ -69,12 +74,16 @@ class BookGenresRepository:
     ) -> BookGenresSchema:
         query = (
             update(self._collection)
-            .where(self._collection.id_bookGenres == bookGenres_id)
+            .where(self._collection.id_book_genres == bookGenres_id)
             .values(bookGenres.model_dump())
             .returning(self._collection)
         )
 
-        updated_bookGenres = await session.scalar(query)
+        try:
+            updated_bookGenres = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise IntegrityError("book_genres")
 
         if not updated_bookGenres:
             raise BookGenresNotFound(_id=bookGenres_id)
@@ -86,7 +95,7 @@ class BookGenresRepository:
             session: AsyncSession,
             bookGenres_id: int
     ) -> None:
-        query = delete(self._collection).where(self._collection.id_bookGenres == bookGenres_id)
+        query = delete(self._collection).where(self._collection.id_book_genres == bookGenres_id)
 
         result = await session.execute(query)
 

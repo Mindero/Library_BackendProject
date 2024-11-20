@@ -2,10 +2,12 @@ from typing import Type
 
 from sqlalchemy import text, insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.AuthorsBookException import AuthorsBookNotFound
 from src.project.models.authorsBook import AuthorsBook
 from src.project.schemas.authorsBookSchema import AuthorsBookSchema, AuthorsBookCreateUpdateSchema
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 
 from pydantic import ValidationError
 
@@ -30,11 +32,7 @@ class AuthorsBooksRepository:
 
         authorsBooks_books = await session.scalars(query)
 
-        print(authorsBooks_books.all())
-        try:
-            return [AuthorsBookSchema.model_validate(obj=val) for val in authorsBooks_books.all()]
-        except ValidationError as e:
-            print(e.json())
+        return [AuthorsBookSchema.model_validate(obj=val) for val in authorsBooks_books.all()]
     async def get_by_id(
             self,
             session: AsyncSession,
@@ -61,11 +59,11 @@ class AuthorsBooksRepository:
             .returning(self._collection)
         )
 
-        created_authorsBook = await session.scalar(query)
-
-        if not created_authorsBook:
-            raise
-        await session.commit()
+        try:
+            created_authorsBook = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound(table_name="authors_book")
 
         return AuthorsBookSchema.model_validate(obj=created_authorsBook)
 
@@ -82,7 +80,11 @@ class AuthorsBooksRepository:
             .returning(self._collection)
         )
 
-        updated_authorsBook = await session.scalar(query)
+        try:
+            updated_authorsBook = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound(table_name="authors_book")
 
         if not updated_authorsBook:
             raise AuthorsBookNotFound(_id=authorsBook_id)

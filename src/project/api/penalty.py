@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, status
 from src.project.api.depends import database, penalty_repo
 from src.project.core.exceptions.PenaltyExceptions import PenaltyNotFound
 from src.project.schemas.penaltySchema import PenaltySchema, PenaltyCreateUpdateSchema
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 
 router = APIRouter()
 
@@ -35,6 +36,8 @@ async def add_penalty(
             new_penalty = await penalty_repo.create_penalty(session=session, penalty=penalty_dto)
     except PenaltyNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return new_penalty
 
@@ -57,6 +60,8 @@ async def update_penalty(
             )
     except PenaltyNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return updated_penalty
 

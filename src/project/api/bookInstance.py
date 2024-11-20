@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, status
 from src.project.api.depends import database, bookInstance_repo
 from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
 from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 
 router = APIRouter()
 
@@ -36,6 +37,8 @@ async def add_bookInstance(
                                                                            bookInstance=bookInstance_dto)
     except BookInstanceNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return new_bookInstance
 
@@ -58,6 +61,8 @@ async def update_bookInstance(
             )
     except BookInstanceNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return updated_bookInstance
 

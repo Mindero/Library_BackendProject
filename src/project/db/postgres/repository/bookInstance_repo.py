@@ -2,8 +2,10 @@ from typing import Type
 
 from sqlalchemy import text, insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 from src.project.models.bookInstance import BookInstance
 from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
 
@@ -55,10 +57,11 @@ class BookInstanceRepository:
             .values(bookInstance.model_dump())
             .returning(self._collection)
         )
-
-        created_bookInstance = await session.scalar(query)
-        await session.commit()
-
+        try:
+            created_bookInstance = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound("book_instance")
         return BookInstanceSchema.model_validate(obj=created_bookInstance)
 
     async def update_bookInstance(
@@ -74,7 +77,11 @@ class BookInstanceRepository:
             .returning(self._collection)
         )
 
-        updated_bookInstance = await session.scalar(query)
+        try:
+            updated_bookInstance = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound("book_instance")
 
         if not updated_bookInstance:
             raise BookInstanceNotFound(_id=bookInstance_id)

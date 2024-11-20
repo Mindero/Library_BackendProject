@@ -2,9 +2,11 @@ from typing import Type
 
 from sqlalchemy import text, update, delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from src.project.core.config import settings
 from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 from src.project.models.bookReader import BookReader
 from src.project.schemas.bookReaderSchema import BookReaderSchema, BookReaderCreateUpdateSchema
 
@@ -57,8 +59,11 @@ class BookReaderRepository:
             .returning(self._collection)
         )
 
-        created_bookReader = await session.scalar(query)
-        await session.commit()
+        try:
+            created_bookReader = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound("book_reader")
 
         return BookReaderSchema.model_validate(obj=created_bookReader)
 
@@ -75,7 +80,11 @@ class BookReaderRepository:
             .returning(self._collection)
         )
 
-        updated_bookReader = await session.scalar(query)
+        try:
+            updated_bookReader = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound("book_reader")
 
         if not updated_bookReader:
             raise BookReaderNotFound(_id=bookReader_id)

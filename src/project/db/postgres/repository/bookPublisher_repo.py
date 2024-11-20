@@ -2,8 +2,10 @@ from typing import Type
 
 from sqlalchemy import text, insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.BookPublisherExceptions import BookPublisherNotFound
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 from src.project.models.bookPublisher import BookPublisher
 from src.project.schemas.bookPublisherSchema import BookPublisherSchema, BookPublisherCreateUpdateSchema
 
@@ -56,8 +58,11 @@ class BookPublisherRepository:
             .returning(self._collection)
         )
 
-        created_bookPublisher = await session.scalar(query)
-        await session.commit()
+        try:
+            created_bookPublisher = await session.scalar(query)
+            await session.commit()
+        except IntegrityError:
+            raise ForeignKeyNotFound("book_publisher")
 
         return BookPublisherSchema.model_validate(obj=created_bookPublisher)
 

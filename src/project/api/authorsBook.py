@@ -3,6 +3,7 @@ from fastapi import APIRouter, status, HTTPException
 from src.project.api.depends import database, authorsBook_repo
 from src.project.core.exceptions.AuthorsBookException import AuthorsBookNotFound
 from src.project.schemas.authorsBookSchema import AuthorsBookSchema, AuthorsBookCreateUpdateSchema
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 
 router = APIRouter()
 
@@ -35,6 +36,8 @@ async def add_authorBook(
             new_authorBook = await authorsBook_repo.create_authorsBook(session=session, authorsBook=author_dto)
     except AuthorsBookNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return new_authorBook
 
@@ -57,6 +60,8 @@ async def update_authorBook(
             )
     except AuthorsBookNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return updated_author
 

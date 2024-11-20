@@ -3,6 +3,7 @@ from fastapi import APIRouter, status, HTTPException
 from src.project.api.depends import database, book_genres_repo
 from src.project.core.exceptions.BookGenresExceptions import BookGenresNotFound
 from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema
+from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 
 router = APIRouter()
 
@@ -35,6 +36,8 @@ async def add_bookGenres(
             new_bookGenres = await book_genres_repo.create_bookGenres(session=session, bookGenres=bookGenres_dto)
     except BookGenresNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return new_bookGenres
 
@@ -57,6 +60,8 @@ async def update_bookGenres(
             )
     except BookGenresNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    except ForeignKeyNotFound as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
     return updated_bookGenres
 

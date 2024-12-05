@@ -19,7 +19,7 @@ async def get_all_authors() -> list[AuthorSchema]:
 async def get_author_by_id(author_id: int) -> AuthorSchema:
     try:
         async with database.session() as session:
-            author = await author_repo.get_by_id(session=session, bookPublisher_id=author_id)
+            author = await author_repo.get_by_id(session=session, author_id=author_id)
     except AuthorNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
     return author
@@ -34,7 +34,7 @@ async def add_author(
             new_author = await author_repo.create_author(session=session, author=author_dto)
     except AuthorNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
-
+    await session.commit()
     return new_author
 
 
@@ -56,7 +56,7 @@ async def update_author(
             )
     except AuthorNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
-
+    await session.commit()
     return updated_author
 
 
@@ -69,5 +69,5 @@ async def delete_author(
             author = await author_repo.delete_author(session=session, author_id=author_id)
     except AuthorNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
-
+    await session.commit()
     return author

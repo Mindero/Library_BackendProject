@@ -78,7 +78,7 @@ class BooksRepository:
 
         if not updated_author:
             raise BookNotFound(_id=book_id)
-
+        await session.commit()
         return BookSchema.model_validate(obj=updated_author)
 
     async def delete_book(
@@ -92,3 +92,4 @@ class BooksRepository:
 
         if not result.rowcount:
             raise BookNotFound(_id=book_id)
+        await session.commit()

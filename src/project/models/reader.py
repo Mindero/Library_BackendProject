@@ -11,5 +11,5 @@ class Readers(Base):
     name: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(nullable=False, unique=True)
     phone_number: Mapped[str] = mapped_column(nullable=False, unique=True)
-    passport: Mapped[str] = mapped_column(nullable=False, unique=True)
     created_date: Mapped[Date] = mapped_column(Date, nullable=False)
+    password: Mapped[str] = mapped_column(nullable=False)  # Hashed

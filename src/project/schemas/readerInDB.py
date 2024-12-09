@@ -23,6 +23,7 @@ class ReaderSchema(ReaderRegisterSchema):
     model_config = ConfigDict(from_attributes=True)
     created_date: date
 
+
 class ReaderInDB(ReaderSchema):
     model_config = ConfigDict(from_attributes=True)
 

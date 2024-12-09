@@ -1,7 +1,6 @@
 from typing import Type, Annotated
 
 from fastapi import Depends
-from pydantic import EmailStr
 from sqlalchemy import text, insert, update, delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,8 +10,8 @@ from src.project.core.exceptions.AuthorizationException import AuthorizationExce
 from src.project.models.reader import Readers
 from src.project.schemas.readerInDB import ReaderInDB, ReaderCreateUpdateSchema, ReaderLoginSchema, \
     ReaderRegisterSchema, ReaderSchema
-from src.project.core.authorization.hash import verify_password, get_password_hash, oauth2_scheme_login
-from src.project.core.authorization.token_service import fetch_access_token, create_access_token
+from project.api.authorization.hash import verify_password, get_password_hash, oauth2_scheme_login
+from project.api.authorization.token_service import fetch_access_token, AUTH_EXCEPTION_MESSAGE
 from datetime import date
 
 class ReadersRepository:
@@ -123,16 +122,16 @@ class ReadersRepository:
         result = await session.scalar(query)
         if not result:
             print("User not found, raising AuthorizationException")
-            raise AuthorizationException()
+            raise AuthorizationException(AUTH_EXCEPTION_MESSAGE)
         if not verify_password(loginDto.password, result.password):
             print("Password mismatch, raising AuthorizationException")
-            raise AuthorizationException()
+            raise AuthorizationException(AUTH_EXCEPTION_MESSAGE)
         return ReaderInDB.model_validate(obj=result)
 
-    async def get_current_user(
-            self,
-            session: AsyncSession,
-            token: Annotated[str, Depends(oauth2_scheme_login)]
-    ) -> ReaderInDB:
-        token_data = fetch_access_token(token)
-        return await self.get_by_id(session=session, reader_id=token_data.reader_id)
+    # async def get_current_user(
+    #         self,
+    #         session: AsyncSession,
+    #         token: Annotated[str, Depends(oauth2_scheme_login)]
+    # ) -> ReaderInDB:
+    #     token_data = fetch_access_token(token)
+    #     return await self.get_by_id(session=session, reader_id=token_data.reader_id)

@@ -28,11 +28,11 @@ class BookReaderRepository:
             self,
             session: AsyncSession,
     ) -> list[BookReaderSchema]:
-        query = f"select * from {settings.POSTGRES_SCHEMA}.{BookReader.__tablename__};"
+        query = select(self._collection)
 
-        bookReader = await session.execute(text(query))
-
-        return [BookReaderSchema.model_validate(obj=val) for val in bookReader.mappings().all()]
+        bookReader = await session.scalars(query)
+        print("get_all_bookReader")
+        return [BookReaderSchema.model_validate(obj=val) for val in bookReader.all()]
 
     async def get_by_id(
             self,

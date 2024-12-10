@@ -2,10 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, status, HTTPException, Depends
 
-from project.core.enums.Role import Role
 from src.project.api.depends import database, genre_repo, RoleChecker
 from src.project.core.exceptions.GenreExceptions import GenreAlreadyExists, GenreNotFound
 from src.project.schemas.genreSchema import GenreSchema, GenreCreateUpdateSchema
+from src.project.core.enums.Role import Role
 
 router = APIRouter()
 

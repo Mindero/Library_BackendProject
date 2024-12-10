@@ -2,11 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, status, HTTPException, Depends
 
-from project.core.enums.Role import Role
 from src.project.api.depends import database, authorsBook_repo, RoleChecker
 from src.project.core.exceptions.AuthorsBookException import AuthorsBookNotFound
 from src.project.schemas.authorsBookSchema import AuthorsBookSchema, AuthorsBookCreateUpdateSchema
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
+from src.project.core.enums.Role import Role
 
 router = APIRouter()
 

@@ -2,10 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, status, HTTPException, Depends
 
-from project.core.enums.Role import Role
 from src.project.api.depends import database, publisher_repo, RoleChecker
 from src.project.core.exceptions.PublisherException import PublisherAlreadyExists, PublisherNotFound
 from src.project.schemas.publisherSchema import PublisherSchema, PublisherCreateUpdateSchema
+from src.project.core.enums.Role import Role
 
 router = APIRouter()
 

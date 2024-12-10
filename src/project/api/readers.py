@@ -37,6 +37,7 @@ async def get_reader_by_id(reader: ReaderInDB = Depends(get_current_reader)) -> 
 @router.post("/add_reader", response_model=ReaderInDB, status_code=status.HTTP_201_CREATED)
 async def add_reader(
         reader_dto: ReaderCreateUpdateSchema,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
 ) -> ReaderInDB:
     try:
         async with database.session() as session:
@@ -55,6 +56,7 @@ async def add_reader(
 async def update_reader(
         reader_id: int,
         reader_dto: ReaderCreateUpdateSchema,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
 ) -> ReaderInDB:
     try:
         async with database.session() as session:
@@ -72,6 +74,7 @@ async def update_reader(
 @router.delete("/delete_reader/{reader_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_reader(
         reader_id: int,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
 ) -> None:
     try:
         async with database.session() as session:

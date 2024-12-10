@@ -1,6 +1,9 @@
-from fastapi import APIRouter, status, HTTPException
+from typing import Annotated
 
-from src.project.api.depends import database, book_genres_repo
+from fastapi import APIRouter, status, HTTPException, Depends
+
+from project.core.enums.Role import Role
+from src.project.api.depends import database, book_genres_repo, RoleChecker
 from src.project.core.exceptions.BookGenresExceptions import BookGenresNotFound
 from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
@@ -30,6 +33,7 @@ async def get_bookGenres_by_id(bookGenres_id: int) -> BookGenresSchema:
 @router.post("/add_bookGenres", response_model=BookGenresSchema, status_code=status.HTTP_201_CREATED)
 async def add_bookGenres(
         bookGenres_dto: BookGenresCreateUpdateSchema,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
 ) -> BookGenresSchema:
     try:
         async with database.session() as session:
@@ -50,6 +54,7 @@ async def add_bookGenres(
 async def update_bookGenres(
         bookGenres_id: int,
         bookGenres_dto: BookGenresCreateUpdateSchema,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
 ) -> BookGenresSchema:
     try:
         async with database.session() as session:
@@ -69,6 +74,7 @@ async def update_bookGenres(
 @router.delete("/delete_bookGenres/{bookGenres_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_bookGenres(
         bookGenres_id: int,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
 ) -> None:
     try:
         async with database.session() as session:

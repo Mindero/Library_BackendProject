@@ -1,6 +1,9 @@
-from fastapi import APIRouter, status, HTTPException
+from typing import Annotated
 
-from src.project.api.depends import database, bookPublisher_repo
+from fastapi import APIRouter, status, HTTPException, Depends
+
+from project.core.enums.Role import Role
+from src.project.api.depends import database, bookPublisher_repo, RoleChecker
 from src.project.core.exceptions.BookPublisherExceptions import BookPublisherNotFound
 from src.project.schemas.bookPublisherSchema import BookPublisherSchema, BookPublisherCreateUpdateSchema
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
@@ -30,6 +33,7 @@ async def get_bookPublisher_by_id(bookPublisher_id: int) -> BookPublisherSchema:
 @router.post("/add_bookPublisher", response_model=BookPublisherSchema, status_code=status.HTTP_201_CREATED)
 async def add_bookPublisher(
         bookPublisher_dto: BookPublisherCreateUpdateSchema,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
 ) -> BookPublisherSchema:
     try:
         async with database.session() as session:
@@ -51,6 +55,7 @@ async def add_bookPublisher(
 async def update_bookPublisher(
         bookPublisher_id: int,
         bookPublisher_dto: BookPublisherCreateUpdateSchema,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
 ) -> BookPublisherSchema:
     try:
         async with database.session() as session:
@@ -70,6 +75,7 @@ async def update_bookPublisher(
 @router.delete("/delete_bookPublisher/{bookPublisher_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_bookPublisher(
         bookPublisher_id: int,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
 ) -> None:
     try:
         async with database.session() as session:

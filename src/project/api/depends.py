@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, status, HTTPException
 
 from project.api.authorization.hash import oauth2_scheme_login
 from project.api.authorization.token_service import fetch_access_token, AUTH_EXCEPTION_MESSAGE
@@ -20,6 +20,8 @@ from project.db.postgres.repository.readers_repo import ReadersRepository
 from project.schemas.readerInDB import ReaderInDB
 from project.schemas.tokenSchema import TokenData
 
+from src.project.core.exceptions.ReaderExceptions import ReaderNotFound
+
 database = PostgresDatabase()
 
 author_repo = AuthorsRepository()
@@ -35,10 +37,26 @@ bookPublisher_repo = BookPublisherRepository()
 bookReader_repo = BookReaderRepository()
 
 
-async def get_current_reader_id(
+async def get_current_reader(
         token: Annotated[str, Depends(oauth2_scheme_login)],
-) -> int:
-    print(token)
+) -> ReaderInDB:
     tokenData: TokenData = fetch_access_token(token)
     reader_id: int = tokenData.reader_id
-    return reader_id
+    try:
+        async with database.session() as session:
+            reader = await reader_repo.get_by_id(session=session, reader_id=reader_id)
+    except ReaderNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return reader
+
+
+class RoleChecker:
+    def __init__(self, allowed_roles: list[str]):
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, reader: Annotated[ReaderInDB, Depends(get_current_reader)]):
+        if reader.role in self.allowed_roles:
+            return True
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You don't have enough permissions")

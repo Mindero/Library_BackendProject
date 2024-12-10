@@ -4,12 +4,13 @@ from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from project.api.authorization.hash import oauth2_scheme_login
-from project.api.authorization.token_service import create_access_token
-from project.core.config import settings
-from project.core.exceptions.AuthorizationException import AuthorizationException
-from project.schemas.tokenSchema import Token
-from src.project.api.depends import database, reader_repo, get_current_reader_id
+from src.project.api.authorization.hash import oauth2_scheme_login
+from src.project.api.authorization.token_service import create_access_token
+from src.project.core.config import settings
+from src.project.core.enums.Role import Role
+from src.project.core.exceptions.AuthorizationException import AuthorizationException
+from src.project.schemas.tokenSchema import Token
+from src.project.api.depends import database, reader_repo, get_current_reader, RoleChecker
 from src.project.core.exceptions.ReaderExceptions import ReaderNotFound
 from src.project.schemas.readerInDB import ReaderInDB, ReaderCreateUpdateSchema, ReaderLoginSchema, \
     ReaderRegisterSchema
@@ -18,7 +19,7 @@ router = APIRouter()
 
 
 @router.get("/all_readers", response_model=list[ReaderInDB])
-async def get_all_readers() -> list[ReaderInDB]:
+async def get_all_readers(_: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]) -> list[ReaderInDB]:
     async with database.session() as session:
         await reader_repo.check_connection(session=session)
         all_readers = await reader_repo.get_all_readers(session=session)
@@ -29,12 +30,7 @@ async def get_all_readers() -> list[ReaderInDB]:
 @router.get("/{reader_id}",
             response_model=ReaderInDB,
             status_code=status.HTTP_200_OK)
-async def get_reader_by_id(reader_id: int = Depends(get_current_reader_id)) -> ReaderInDB:
-    try:
-        async with database.session() as session:
-            reader = await reader_repo.get_by_id(session=session, reader_id=reader_id)
-    except ReaderNotFound as error:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+async def get_reader_by_id(reader: ReaderInDB = Depends(get_current_reader)) -> ReaderInDB:
     return reader
 
 

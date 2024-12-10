@@ -2,6 +2,8 @@ from datetime import date
 
 from pydantic import BaseModel, ConfigDict, EmailStr, root_validator
 
+from src.project.core.enums.Role import Role
+
 
 class ReaderCreateUpdateSchema(BaseModel):
     name: str
@@ -28,3 +30,4 @@ class ReaderInDB(ReaderSchema):
     model_config = ConfigDict(from_attributes=True)
 
     reader_ticket: int
+    role: Role

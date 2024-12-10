@@ -1,6 +1,7 @@
-from sqlalchemy import Date
+from sqlalchemy import Date, Column, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
+from src.project.core.enums.Role import Role
 from src.project.db.postgres.database import Base
 
 
@@ -13,3 +14,4 @@ class Readers(Base):
     phone_number: Mapped[str] = mapped_column(nullable=False, unique=True)
     created_date: Mapped[Date] = mapped_column(Date, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)  # Hashed
+    role: Mapped[Role] = mapped_column(Enum(Role), default=Role.USER)

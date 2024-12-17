@@ -30,6 +30,10 @@ class PostgresDatabase:
                 await session.rollback()
                 raise
 
+    @property
+    def engine(self):
+        return self._engine
+
 
 database = PostgresDatabase()
 metadata = MetaData(schema=settings.POSTGRES_SCHEMA)

@@ -9,4 +9,3 @@ from .genre import Genres
 from .penalty import Penalty
 from .publisher import Publishers
 from .reader import Readers
-from .viewBook import ViewBook

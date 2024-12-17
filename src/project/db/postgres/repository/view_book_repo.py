@@ -3,20 +3,17 @@ from typing import Type
 from sqlalchemy import text, select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.project.models.viewBook import ViewBook
+from project.core.config import settings
 from project.schemas.views.viewBookSchema import ViewBookSchema
 
 
 class ViewBookRepository:
-    pass
-    _collection: Type[ViewBook] = ViewBook
-
     async def get_all_view_books(
             self,
             session: AsyncSession,
     ) -> list[ViewBookSchema]:
-        query = select(self._collection)
+        query = f"select * from {settings.POSTGRES_SCHEMA}.view_book;"
 
-        view_books = await session.scalars(query)
+        view_books = await session.execute(text(query))
 
         return [ViewBookSchema.model_validate(obj=view_book) for view_book in view_books.all()]

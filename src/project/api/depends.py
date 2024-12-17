@@ -17,6 +17,7 @@ from project.db.postgres.repository.genres_repo import GenreRepository
 from project.db.postgres.repository.penalty_repo import PenaltyRepository
 from project.db.postgres.repository.publishers_repo import PublishersRepository
 from project.db.postgres.repository.readers_repo import ReadersRepository
+from project.db.postgres.repository.view_book_repo import ViewBookRepository
 from project.schemas.readerInDB import ReaderInDB
 from project.schemas.tokenSchema import TokenData
 
@@ -35,6 +36,7 @@ book_genres_repo = BookGenresRepository()
 bookInstance_repo = BookInstanceRepository()
 bookPublisher_repo = BookPublisherRepository()
 bookReader_repo = BookReaderRepository()
+viewBook_repo = ViewBookRepository()
 
 
 async def get_current_reader(

@@ -16,6 +16,7 @@ from project.api import genres
 from project.api import penalty
 from project.api import publishers
 from project.api import readers
+from project.api import book_view
 from project.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,7 @@ def create_app() -> FastAPI:
     app.include_router(bookPublisher.router, prefix="/api/book_publisher", tags=["Book_publisher APIs"])
     app.include_router(bookReader.router, prefix="/api/book_reader", tags=["Book_reader APIs"])
     app.include_router(penalty.router, prefix="/api/penalty", tags=["Penalty APIs"])
+    app.include_router(book_view.router, prefix="/api/view_book", tags=["View book APIs"])
 
     return app
 

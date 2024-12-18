@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.BookGenresExceptions import BookGenresNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models.bookGenres import BookGenres
+from src.project.models import BookGenres
 from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema
 
 

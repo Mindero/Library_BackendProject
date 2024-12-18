@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.core.exceptions.GenreExceptions import GenreAlreadyExists, GenreNotFound
-from src.project.models.genre import Genres
+from src.project.models import Genres
 from src.project.schemas.genreSchema import GenreSchema, GenreCreateUpdateSchema
 
 

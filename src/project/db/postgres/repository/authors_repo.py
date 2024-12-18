@@ -4,7 +4,7 @@ from sqlalchemy import text, select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.core.exceptions.AuthorExceptions import AuthorNotFound
-from src.project.models.author import Authors
+from src.project.models import Authors
 from src.project.schemas.authorSchema import AuthorSchema, AuthorCreateUpdateSchema
 
 
@@ -82,3 +82,4 @@ class AuthorsRepository:
             raise AuthorNotFound(_id=author_id)
 
         return AuthorSchema.model_validate(obj=result)
+

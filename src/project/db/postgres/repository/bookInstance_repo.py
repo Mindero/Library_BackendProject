@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models.bookInstance import BookInstance
+from src.project.models import BookInstance
 from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
 
 

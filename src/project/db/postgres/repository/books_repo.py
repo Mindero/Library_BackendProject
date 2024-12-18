@@ -3,8 +3,9 @@ from typing import Type
 from sqlalchemy import text, select, insert, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.project.models import Authors, AuthorsBook
 from src.project.core.exceptions.BookExceptions import BookNotFound
-from src.project.models.book import Books
+from src.project.models import Books
 from src.project.schemas.bookSchema import BookSchema, BookCreateUpdateSchema
 
 
@@ -93,3 +94,24 @@ class BooksRepository:
         if not result.rowcount:
             raise BookNotFound(_id=book_id)
         await session.commit()
+
+    async def get_book_and_authors_by_name(
+            self,
+            session: AsyncSession,
+            id_book: int
+    ):
+        query = (
+            select(Books.name, Authors.id_author, Authors.name)
+            .join(AuthorsBook, Books.id_book == AuthorsBook.id_book)
+            .join(Authors, AuthorsBook.id_author == Authors.id_author)
+            .where(Books.id_book == id_book)
+        )
+        res = await session.execute(query)
+        res = res.all()
+        if res:
+            return {
+                "book_name": res[0][0],
+                "authors": [{"id": row[1], "name": row[2]} for row in res]
+            }
+        else:
+            raise BookNotFound(id_book)

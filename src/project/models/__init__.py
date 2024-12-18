@@ -9,3 +9,8 @@ from .genre import Genres
 from .penalty import Penalty
 from .publisher import Publishers
 from .reader import Readers
+
+__all__ = ["Books", "Authors", "AuthorsBook",
+           "BookGenres", "BookInstance", "BookPublisher",
+           "BookReader", "Genres", "Penalty",
+           "Publishers", "Readers"]

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.AuthorsBookException import AuthorsBookNotFound
-from src.project.models.authorsBook import AuthorsBook
+from src.project.models import AuthorsBook
 from src.project.schemas.authorsBookSchema import AuthorsBookSchema, AuthorsBookCreateUpdateSchema
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 

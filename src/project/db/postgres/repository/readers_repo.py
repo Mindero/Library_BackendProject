@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.core.exceptions.ReaderExceptions import ReaderAlreadyExists, ReaderNotFound
 from src.project.core.exceptions.AuthorizationException import AuthorizationException
-from src.project.models.reader import Readers
+from src.project.models import Readers
 from src.project.schemas.readerInDB import ReaderInDB, ReaderCreateUpdateSchema, ReaderLoginSchema, \
     ReaderRegisterSchema, ReaderSchema
 from project.api.authorization.hash import verify_password, get_password_hash, oauth2_scheme_login

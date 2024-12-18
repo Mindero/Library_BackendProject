@@ -1,5 +1,5 @@
 from typing import Final
-from src.project.models.reader import Readers
+from src.project.models import Readers
 
 
 class ReaderNotFound(BaseException):

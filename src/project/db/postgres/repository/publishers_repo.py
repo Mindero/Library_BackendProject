@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.core.exceptions.PublisherException import PublisherAlreadyExists, PublisherNotFound
-from src.project.models.publisher import Publishers
+from src.project.models import Publishers
 from src.project.schemas.publisherSchema import PublisherSchema, PublisherCreateUpdateSchema
 
 

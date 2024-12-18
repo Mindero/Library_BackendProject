@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.PenaltyExceptions import PenaltyNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models.penalty import Penalty
+from src.project.models import Penalty
 from src.project.schemas.penaltySchema import PenaltySchema, PenaltyCreateUpdateSchema
 
 

@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.BookPublisherExceptions import BookPublisherNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models.bookPublisher import BookPublisher
+from src.project.models import BookPublisher
 from src.project.schemas.bookPublisherSchema import BookPublisherSchema, BookPublisherCreateUpdateSchema
 
 

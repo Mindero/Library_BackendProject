@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from src.project.core.config import settings
 from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models.bookReader import BookReader
+from src.project.models import BookReader
 from src.project.schemas.bookReaderSchema import BookReaderSchema, BookReaderCreateUpdateSchema
 
 

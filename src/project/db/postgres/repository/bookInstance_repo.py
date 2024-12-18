@@ -4,9 +4,10 @@ from sqlalchemy import text, insert, update, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
+from project.core.exceptions.BookExceptions import BookNotFound
 from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models import BookInstance
+from src.project.models import BookInstance, Publishers, BookPublisher
 from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
 
 
@@ -99,3 +100,27 @@ class BookInstanceRepository:
 
         if not result.rowcount:
             raise BookInstanceNotFound(_id=bookInstance_id)
+
+    async def get_available_instances_by_book_id(
+            self,
+            session: AsyncSession,
+            book_id: int
+    ):
+        query = (
+            select(BookInstance.id_instance, BookInstance.supply_date, Publishers.name)
+            .join(BookPublisher, BookPublisher.id_book_publisher == BookInstance.id_book_publisher)
+            .join(Publishers, Publishers.id_publisher == BookPublisher.id_publisher)
+            .where(BookPublisher.id_book == book_id)
+            .where(BookInstance.taken_now == False)
+        )
+        res = await session.execute(query)
+        res = res.all()
+        if res:
+            return [{
+                "id_instance": row[0],
+                "supply_date": row[1],
+                "publisher_name": row[2]
+            }
+                for row in res]
+        else:
+            raise BookNotFound(_id=book_id)

@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, status, Depends
 
+from project.core.exceptions.BookExceptions import BookNotFound
 from src.project.api.depends import database, bookInstance_repo, RoleChecker
 from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
 from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
@@ -84,3 +85,18 @@ async def delete_bookInstance(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
 
     return bookInstance
+
+
+@router.get("/get_free_instances/{book_id}", status_code=status.HTTP_200_OK)
+async def get_available_instances_by_book_id(
+        book_id: int,
+):
+    try:
+        async with database.session() as session:
+            instances = await bookInstance_repo.get_available_instances_by_book_id(session=session,
+                                                                                   book_id=book_id)
+    except BookNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+
+    return instances
+

@@ -3,6 +3,11 @@ from datetime import date
 from pydantic import BaseModel, ConfigDict
 
 
+class BookReaderCreateUpdateSchemaWithoutId(BaseModel):
+    id_instance: int
+    borrow_date: date
+    end_date: date
+
 class BookReaderCreateUpdateSchema(BaseModel):
     reader_ticket: int
     id_instance: int

@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from src.project.core.config import settings
 from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models import BookReader
+from src.project.models import BookReader, Books, BookInstance, BookPublisher
 from src.project.schemas.bookReaderSchema import BookReaderSchema, BookReaderCreateUpdateSchema
 
 
@@ -102,3 +102,28 @@ class BookReaderRepository:
 
         if not result.rowcount:
             raise BookReaderNotFound(_id=bookReader_id)
+
+    async def get_all_by_reader_id(
+            self,
+            session: AsyncSession,
+            reader_id: int
+    ):
+        query = (
+            select(Books.name, Books.id_book, BookReader.id_instance, BookReader.borrow_date, BookReader.end_date)
+            .join(BookInstance, BookInstance.id_instance == BookReader.id_instance)
+            .join(BookPublisher, BookPublisher.id_book_publisher == BookInstance.id_book_publisher)
+            .join(Books, Books.id_book == BookPublisher.id_book)
+            .where(BookReader.reader_ticket == reader_id)
+        )
+
+        result = await session.execute(query)
+
+        return [
+            {
+                "book_name": row[0],
+                "id_book": row[1],
+                "id_instance": row[2],
+                "borrow_date": row[3],
+                "end_date": row[4]
+            }
+            for row in result]

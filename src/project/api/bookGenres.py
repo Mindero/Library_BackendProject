@@ -4,7 +4,7 @@ from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.project.api.depends import database, book_genres_repo, RoleChecker
 from src.project.core.exceptions.BookGenresExceptions import BookGenresNotFound
-from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema
+from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema, BookGenresViewSchema
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 from src.project.core.enums.Role import Role
 
@@ -16,6 +16,15 @@ async def get_all_book_genres() -> list[BookGenresSchema]:
     async with database.session() as session:
         await book_genres_repo.check_connection(session=session)
         all_book_genres = await book_genres_repo.get_all_bookGenres(session=session)
+
+    return all_book_genres
+
+
+@router.get("/all_view_book_genres", response_model=list[BookGenresViewSchema])
+async def get_all_view_book_genres() -> list[BookGenresViewSchema]:
+    async with database.session() as session:
+        await book_genres_repo.check_connection(session=session)
+        all_book_genres = await book_genres_repo.get_all_view_bookGenres(session=session)
 
     return all_book_genres
 
@@ -33,7 +42,7 @@ async def get_bookGenres_by_id(bookGenres_id: int) -> BookGenresSchema:
 @router.post("/add_bookGenres", response_model=BookGenresSchema, status_code=status.HTTP_201_CREATED)
 async def add_bookGenres(
         bookGenres_dto: BookGenresCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> BookGenresSchema:
     try:
         async with database.session() as session:
@@ -54,7 +63,7 @@ async def add_bookGenres(
 async def update_bookGenres(
         bookGenres_id: int,
         bookGenres_dto: BookGenresCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> BookGenresSchema:
     try:
         async with database.session() as session:
@@ -74,7 +83,7 @@ async def update_bookGenres(
 @router.delete("/delete_bookGenres/{bookGenres_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_bookGenres(
         bookGenres_id: int,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> None:
     try:
         async with database.session() as session:

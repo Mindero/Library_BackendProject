@@ -6,8 +6,9 @@ from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.BookPublisherExceptions import BookPublisherNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models import BookPublisher
-from src.project.schemas.bookPublisherSchema import BookPublisherSchema, BookPublisherCreateUpdateSchema
+from src.project.models import BookPublisher, Books, Publishers
+from src.project.schemas.bookPublisherSchema import BookPublisherSchema, BookPublisherCreateUpdateSchema, \
+    ViewBookPublisherSchema
 
 
 class BookPublisherRepository:
@@ -32,6 +33,37 @@ class BookPublisherRepository:
         bookPublisher = await session.scalars(query)
 
         return [BookPublisherSchema.model_validate(obj=val) for val in bookPublisher.all()]
+
+    async def get_all_view_bookPublisher(
+            self,
+            session: AsyncSession,
+    ) -> list[ViewBookPublisherSchema]:
+        query = (
+            select(
+                BookPublisher.id_book_publisher,
+                BookPublisher.id_book,
+                BookPublisher.id_publisher,
+                Books.name.label("book_name"),
+                Publishers.name.label("publisher_name")
+            )
+            .join(Books, Books.id_book == BookPublisher.id_book)
+            .join(Publishers, Publishers.id_publisher == BookPublisher.id_publisher)
+        )
+
+        results = await session.execute(query)  # Используем execute для получения результата
+        rows = results.fetchall()  # Получаем все строки
+
+        return [
+            ViewBookPublisherSchema(
+                id_book_publisher=row[0],
+                id_book=row[1],
+                id_publisher=row[2],
+                book_name=row[3],
+                publisher=row[4],
+            )
+            for row in rows
+        ]
+
 
     async def get_by_id(
             self,

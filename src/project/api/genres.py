@@ -32,7 +32,7 @@ async def get_genres_by_id(genre_id: int) -> GenreSchema:
 @router.post("/add_genre", response_model=GenreSchema, status_code=status.HTTP_201_CREATED)
 async def add_genre(
         genre_dto: GenreCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> GenreSchema:
     try:
         async with database.session() as session:
@@ -51,7 +51,7 @@ async def add_genre(
 async def update_genre(
         genre_id: int,
         genre_dto: GenreCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> GenreSchema:
     try:
         async with database.session() as session:
@@ -69,7 +69,7 @@ async def update_genre(
 @router.delete("/delete_genre/{genre_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_genre(
         genre_id: int,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> None:
     try:
         async with database.session() as session:

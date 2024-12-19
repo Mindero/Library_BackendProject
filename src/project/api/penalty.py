@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get("/all_penalty", response_model=list[PenaltySchema])
 async def get_all_penalty(
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))],
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))],
 ) -> list[PenaltySchema]:
     async with database.session() as session:
         await penalty_repo.check_connection(session=session)
@@ -63,7 +63,7 @@ async def add_penalty(
 async def update_penalty(
         penalty_id: int,
         penalty_dto: PenaltyCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))],
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))],
 ) -> PenaltySchema:
     try:
         async with database.session() as session:

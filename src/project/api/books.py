@@ -22,7 +22,7 @@ async def get_all_books() -> list[BookSchema]:
 @router.post("/add_book", response_model=BookSchema, status_code=status.HTTP_201_CREATED)
 async def add_book(
         book_dto: BookCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> BookSchema:
     try:
         async with database.session() as session:
@@ -51,7 +51,7 @@ async def get_book_by_id(book_id: int) -> BookSchema:
 async def update_book(
         book_id: int,
         book_dto: BookCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> BookSchema:
     try:
         async with database.session() as session:
@@ -69,7 +69,7 @@ async def update_book(
 @router.delete("/delete_book/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_book(
         book_id: int,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> None:
     try:
         async with database.session() as session:

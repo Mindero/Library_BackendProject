@@ -5,7 +5,8 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from project.core.exceptions.BookExceptions import BookNotFound
 from src.project.api.depends import database, bookInstance_repo, RoleChecker
 from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
-from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
+from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema, \
+    ViewBookInstanceSchema
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 from src.project.core.enums.Role import Role
 
@@ -17,6 +18,15 @@ async def get_all_book_instance() -> list[BookInstanceSchema]:
     async with database.session() as session:
         await bookInstance_repo.check_connection(session=session)
         all_book_instance = await bookInstance_repo.get_all_bookInstance(session=session)
+
+    return all_book_instance
+
+
+@router.get("/all_view_book_instance", response_model=list[ViewBookInstanceSchema])
+async def get_all_book_instance() -> list[BookInstanceSchema]:
+    async with database.session() as session:
+        await bookInstance_repo.check_connection(session=session)
+        all_book_instance = await bookInstance_repo.get_all_view_bookInstance(session=session)
 
     return all_book_instance
 
@@ -34,7 +44,7 @@ async def get_bookInstance_by_id(bookInstance_id: int) -> BookInstanceSchema:
 @router.post("/add_bookInstance", response_model=BookInstanceSchema, status_code=status.HTTP_201_CREATED)
 async def add_bookInstance(
         bookInstance_dto: BookInstanceCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> BookInstanceSchema:
     try:
         async with database.session() as session:
@@ -56,7 +66,7 @@ async def add_bookInstance(
 async def update_bookInstance(
         bookInstance_id: int,
         bookInstance_dto: BookInstanceCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> BookInstanceSchema:
     try:
         async with database.session() as session:
@@ -76,7 +86,7 @@ async def update_bookInstance(
 @router.delete("/delete_bookInstance/{bookInstance_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_bookInstance(
         bookInstance_id: int,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> None:
     try:
         async with database.session() as session:
@@ -99,4 +109,3 @@ async def get_available_instances_by_book_id(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
 
     return instances
-

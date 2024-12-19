@@ -32,7 +32,7 @@ async def get_publisher_by_id(publisher_id: int) -> PublisherSchema:
 @router.post("/add_publisher", response_model=PublisherSchema, status_code=status.HTTP_201_CREATED)
 async def add_publisher(
         publisher_dto: PublisherCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> PublisherSchema:
     try:
         async with database.session() as session:
@@ -51,7 +51,7 @@ async def add_publisher(
 async def update_publisher(
         publisher_id: int,
         publisher_dto: PublisherCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> PublisherSchema:
     try:
         async with database.session() as session:
@@ -69,7 +69,7 @@ async def update_publisher(
 @router.delete("/delete_publisher/{publisher_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_publisher(
         publisher_id: int,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> None:
     try:
         async with database.session() as session:

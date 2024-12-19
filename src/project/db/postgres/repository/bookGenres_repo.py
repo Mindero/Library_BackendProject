@@ -6,8 +6,8 @@ from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.BookGenresExceptions import BookGenresNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models import BookGenres
-from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema
+from src.project.models import BookGenres, Books, Genres
+from src.project.schemas.bookGenresSchema import BookGenresSchema, BookGenresCreateUpdateSchema, BookGenresViewSchema
 
 
 class BookGenresRepository:
@@ -32,6 +32,36 @@ class BookGenresRepository:
         bookGenres = await session.scalars(query)
 
         return [BookGenresSchema.model_validate(obj=val) for val in bookGenres.all()]
+
+    async def get_all_view_bookGenres(
+            self,
+            session: AsyncSession,
+    ) -> list[BookGenresViewSchema]:
+        query = (
+            select(
+                BookGenres.id_book_genres,
+                Books.id_book,
+                Genres.id_genre,
+                Books.name.label("book_name"),
+                Genres.name.label("genre_name")
+            )
+            .join(Books, Books.id_book == BookGenres.id_book)
+            .join(Genres, Genres.id_genre == BookGenres.id_genre)
+        )
+
+        results = await session.execute(query)  # Используем execute для получения результата
+        rows = results.fetchall()  # Получаем все строки
+
+        return [
+            BookGenresViewSchema(
+                id_book_genres=row[0],
+                id_book=row[1],
+                id_genre=row[2],
+                book_name=row[3],
+                genre_name=row[4]
+            )
+            for row in rows
+        ]
 
     async def get_by_id(
             self,
@@ -83,7 +113,7 @@ class BookGenresRepository:
             updated_bookGenres = await session.scalar(query)
             await session.commit()
         except IntegrityError:
-            raise IntegrityError("book_genres")
+            raise ForeignKeyNotFound("book_genres")
 
         if not updated_bookGenres:
             raise BookGenresNotFound(_id=bookGenres_id)

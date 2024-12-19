@@ -5,8 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.AuthorsBookException import AuthorsBookNotFound
-from src.project.models import AuthorsBook
-from src.project.schemas.authorsBookSchema import AuthorsBookSchema, AuthorsBookCreateUpdateSchema
+from src.project.models import AuthorsBook, Books, Authors
+from src.project.schemas.authorsBookSchema import AuthorsBookSchema, AuthorsBookCreateUpdateSchema, \
+    ViewAuthorsBookSchema
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 
 from pydantic import ValidationError
@@ -33,6 +34,37 @@ class AuthorsBooksRepository:
         authorsBooks_books = await session.scalars(query)
 
         return [AuthorsBookSchema.model_validate(obj=val) for val in authorsBooks_books.all()]
+
+    async def get_all_view_authorsBooks(
+            self,
+            session: AsyncSession,
+    ) -> list[ViewAuthorsBookSchema]:
+        query = (
+            select(
+                AuthorsBook.id_authors_book,
+                AuthorsBook.id_book,
+                AuthorsBook.id_author,
+                Books.name.label("book_name"),
+                Authors.name.label("author_name")
+            )
+            .join(Books, Books.id_book == AuthorsBook.id_book)
+            .join(Authors, Authors.id_author == AuthorsBook.id_author)
+        )
+
+        results = await session.execute(query)  # Используем execute для получения результата
+        rows = results.fetchall()  # Получаем все строки
+
+        return [
+            ViewAuthorsBookSchema(
+                id_authors_book=row[0],
+                id_book=row[1],
+                id_author=row[2],
+                book_name=row[3],
+                author_name=row[4]
+            )
+            for row in rows
+        ]
+
     async def get_by_id(
             self,
             session: AsyncSession,

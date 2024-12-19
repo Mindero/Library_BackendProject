@@ -4,6 +4,7 @@ from fastapi import Depends, status, HTTPException
 
 from project.api.authorization.hash import oauth2_scheme_login
 from project.api.authorization.token_service import fetch_access_token, AUTH_EXCEPTION_MESSAGE
+from project.core.enums.Role import Role
 from project.core.exceptions.AuthorizationException import AuthorizationException
 from project.db.postgres.database import PostgresDatabase
 from project.db.postgres.repository.authorsBook_repo import AuthorsBooksRepository
@@ -57,7 +58,7 @@ class RoleChecker:
         self.allowed_roles = allowed_roles
 
     def __call__(self, reader: Annotated[ReaderInDB, Depends(get_current_reader)]):
-        if reader.role in self.allowed_roles:
+        if reader.role.value in self.allowed_roles:
             return True
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

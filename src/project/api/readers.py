@@ -11,15 +11,15 @@ from src.project.core.enums.Role import Role
 from src.project.core.exceptions.AuthorizationException import AuthorizationException
 from src.project.schemas.tokenSchema import Token
 from src.project.api.depends import database, reader_repo, get_current_reader, RoleChecker
-from src.project.core.exceptions.ReaderExceptions import ReaderNotFound
+from src.project.core.exceptions.ReaderExceptions import ReaderNotFound, ReaderAlreadyExists
 from src.project.schemas.readerInDB import ReaderInDB, ReaderCreateUpdateSchema, ReaderLoginSchema, \
-    ReaderRegisterSchema
+    ReaderRegisterSchema, ReaderAdminCreateSchema
 
 router = APIRouter()
 
 
 @router.get("/all_readers", response_model=list[ReaderInDB])
-async def get_all_readers(_: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]) -> list[ReaderInDB]:
+async def get_all_readers(_: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]) -> list[ReaderInDB]:
     async with database.session() as session:
         await reader_repo.check_connection(session=session)
         all_readers = await reader_repo.get_all_readers(session=session)
@@ -36,14 +36,16 @@ async def get_reader_by_id(reader: ReaderInDB = Depends(get_current_reader)) -> 
 
 @router.post("/add_reader", response_model=ReaderInDB, status_code=status.HTTP_201_CREATED)
 async def add_reader(
-        reader_dto: ReaderCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        reader_dto: ReaderAdminCreateSchema,
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> ReaderInDB:
     try:
         async with database.session() as session:
-            new_reader = await reader_repo.create_reader(session=session, reader=reader_dto)
+            new_reader = await reader_repo.add_reader(session=session, readerCreateAdmin=reader_dto)
     except ReaderNotFound as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
+    except ReaderAlreadyExists as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=error)
 
     return new_reader
 
@@ -56,7 +58,7 @@ async def add_reader(
 async def update_reader(
         reader_id: int,
         reader_dto: ReaderCreateUpdateSchema,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> ReaderInDB:
     try:
         async with database.session() as session:
@@ -74,7 +76,7 @@ async def update_reader(
 @router.delete("/delete_reader/{reader_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_reader(
         reader_id: int,
-        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN]))]
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]
 ) -> None:
     try:
         async with database.session() as session:
@@ -93,7 +95,7 @@ async def login_reader(form_data: Annotated[OAuth2PasswordRequestForm, Depends()
             loginDto=ReaderLoginSchema(email=form_data.username, password=form_data.password))
     token = create_access_token(reader.reader_ticket,
                                 expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    return Token(access_token=token, token_type="bearer")
+    return Token(access_token=token, token_type="bearer", role=reader.role)
 
 
 @router.post("/auth/register", status_code=status.HTTP_201_CREATED)

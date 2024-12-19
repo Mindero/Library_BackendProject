@@ -9,7 +9,7 @@ from src.project.core.exceptions.ReaderExceptions import ReaderAlreadyExists, Re
 from src.project.core.exceptions.AuthorizationException import AuthorizationException
 from src.project.models import Readers
 from src.project.schemas.readerInDB import ReaderInDB, ReaderCreateUpdateSchema, ReaderLoginSchema, \
-    ReaderRegisterSchema, ReaderSchema
+    ReaderRegisterSchema, ReaderSchema, ReaderAdminCreateSchema
 from project.api.authorization.hash import verify_password, get_password_hash, oauth2_scheme_login
 from project.api.authorization.token_service import fetch_access_token, AUTH_EXCEPTION_MESSAGE
 from datetime import date
@@ -86,10 +86,11 @@ class ReadersRepository:
             reader_id: int,
             reader: ReaderCreateUpdateSchema,
     ) -> ReaderInDB:
+        update_data = {key: value for key, value in reader.model_dump().items() if key != "password"}
         query = (
             update(self._collection)
             .where(self._collection.reader_ticket == reader_id)
-            .values(reader.model_dump())
+            .values(update_data)
             .returning(self._collection)
         )
 
@@ -128,10 +129,30 @@ class ReadersRepository:
             raise AuthorizationException(AUTH_EXCEPTION_MESSAGE)
         return ReaderInDB.model_validate(obj=result)
 
-    # async def get_current_user(
-    #         self,
-    #         session: AsyncSession,
-    #         token: Annotated[str, Depends(oauth2_scheme_login)]
-    # ) -> ReaderInDB:
-    #     token_data = fetch_access_token(token)
-    #     return await self.get_by_id(session=session, reader_id=token_data.reader_id)
+    async def add_reader(
+            self,
+            session: AsyncSession,
+            readerCreateAdmin: ReaderAdminCreateSchema,
+    ) -> ReaderInDB:
+
+        reader_data = readerCreateAdmin.dict()
+        reader_data['created_date'] = date.today()  # Добавляем текущую дату
+
+        # Создаем объект ReaderSchema
+        reader: ReaderSchema = ReaderSchema(**reader_data)
+
+        reader.password = get_password_hash(reader.password)
+
+        query = (
+            insert(self._collection)
+            .values(reader.model_dump())
+            .returning(self._collection)
+        )
+
+        try:
+            created_reader = await session.scalar(query)
+            await session.commit()
+        except IntegrityError as e:
+            raise ReaderAlreadyExists()
+
+        return ReaderInDB.model_validate(obj=created_reader)

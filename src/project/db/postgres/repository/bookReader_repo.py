@@ -7,8 +7,8 @@ from sqlalchemy.exc import IntegrityError
 from src.project.core.config import settings
 from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models import BookReader, Books, BookInstance, BookPublisher
-from src.project.schemas.bookReaderSchema import BookReaderSchema, BookReaderCreateUpdateSchema
+from src.project.models import BookReader, Books, BookInstance, BookPublisher, Publishers
+from src.project.schemas.bookReaderSchema import BookReaderSchema, BookReaderCreateUpdateSchema, ViewBookReaderSchema
 
 
 class BookReaderRepository:
@@ -33,6 +33,42 @@ class BookReaderRepository:
         bookReader = await session.scalars(query)
         print("get_all_bookReader")
         return [BookReaderSchema.model_validate(obj=val) for val in bookReader.all()]
+
+    async def get_all_view_bookReader(
+            self,
+            session: AsyncSession,
+    ) -> list[ViewBookReaderSchema]:
+        query = (
+            select(
+                BookReader.id_book_reader,
+                BookReader.reader_ticket,
+                BookReader.id_instance,
+                BookReader.borrow_date,
+                BookReader.end_date,
+                Books.name.label("book_name"),
+                Publishers.name.label("publisher_name")
+            )
+            .join(BookInstance, BookInstance.id_instance == BookReader.id_instance)
+            .join(BookPublisher, BookPublisher.id_book_publisher == BookInstance.id_book_publisher)
+            .join(Books, Books.id_book == BookPublisher.id_book)
+            .join(Publishers, Publishers.id_publisher == BookPublisher.id_publisher)
+        )
+
+        results = await session.execute(query)  # Используем execute для получения результата
+        rows = results.fetchall()  # Получаем все строки
+
+        return [
+            ViewBookReaderSchema(
+                id_book_reader=row[0],
+                reader_ticket=row[1],
+                id_instance=row[2],
+                borrow_date=row[3],
+                end_date=row[4],
+                book_name=row[5],
+                publisher_name=row[6],
+            )
+            for row in rows
+        ]
 
     async def get_by_id(
             self,

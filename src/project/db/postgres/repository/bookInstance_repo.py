@@ -7,8 +7,9 @@ from sqlalchemy.exc import IntegrityError
 from project.core.exceptions.BookExceptions import BookNotFound
 from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models import BookInstance, Publishers, BookPublisher
-from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema
+from src.project.models import BookInstance, Publishers, BookPublisher, Books
+from src.project.schemas.bookInstanceSchema import BookInstanceSchema, BookInstanceCreateUpdateSchema, \
+    ViewBookInstanceSchema
 
 
 class BookInstanceRepository:
@@ -33,6 +34,39 @@ class BookInstanceRepository:
         bookInstance = await session.scalars(query)
 
         return [BookInstanceSchema.model_validate(obj=val) for val in bookInstance.all()]
+
+    async def get_all_view_bookInstance(
+            self,
+            session: AsyncSession,
+    ) -> list[ViewBookInstanceSchema]:
+        query = (
+            select(
+                BookInstance.id_instance,
+                BookInstance.id_book_publisher,
+                BookInstance.supply_date,
+                BookInstance.taken_now,
+                Books.name.label("book_name"),
+                Publishers.name.label("publisher_name")
+            )
+            .join(BookPublisher, BookPublisher.id_book_publisher == BookInstance.id_book_publisher)
+            .join(Books, Books.id_book == BookPublisher.id_book)
+            .join(Publishers, Publishers.id_publisher == BookPublisher.id_publisher)
+        )
+
+        results = await session.execute(query)  # Используем execute для получения результата
+        rows = results.fetchall()  # Получаем все строки
+
+        return [
+            ViewBookInstanceSchema(
+                id_instance=row[0],
+                id_book_publisher=row[1],
+                supply_date=row[2],
+                taken_now=row[3],
+                book_name=row[4],
+                publisher=row[5]
+            )
+            for row in rows
+        ]
 
     async def get_by_id(
             self,
@@ -115,6 +149,7 @@ class BookInstanceRepository:
         )
         res = await session.execute(query)
         res = res.all()
+        print(f"Book_id {book_id} result = {res}")
         if res:
             return [{
                 "id_instance": row[0],
@@ -123,4 +158,4 @@ class BookInstanceRepository:
             }
                 for row in res]
         else:
-            raise BookNotFound(_id=book_id)
+            return []

@@ -82,4 +82,3 @@ class AuthorsRepository:
             raise AuthorNotFound(_id=author_id)
 
         return AuthorSchema.model_validate(obj=result)
-

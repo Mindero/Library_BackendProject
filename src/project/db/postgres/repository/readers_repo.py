@@ -1,13 +1,14 @@
 from typing import Type, Annotated
 
 from fastapi import Depends
-from sqlalchemy import text, insert, update, delete, select
+from sqlalchemy import text, insert, update, delete, select, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from project.schemas.penaltySchema import PenaltySchema
 from src.project.core.exceptions.ReaderExceptions import ReaderAlreadyExists, ReaderNotFound
 from src.project.core.exceptions.AuthorizationException import AuthorizationException
-from src.project.models import Readers
+from src.project.models import Readers, Penalty, BookReader
 from src.project.schemas.readerInDB import ReaderInDB, ReaderCreateUpdateSchema, ReaderLoginSchema, \
     ReaderRegisterSchema, ReaderSchema, ReaderAdminCreateSchema
 from project.api.authorization.hash import verify_password, get_password_hash, oauth2_scheme_login
@@ -50,6 +51,30 @@ class ReadersRepository:
             raise ReaderNotFound(_id=reader_id)
 
         return ReaderInDB.model_validate(obj=result)
+
+    async def get_penalty_by_id(
+            self,
+            session: AsyncSession,
+            reader_id: int
+    ):
+        query = (
+            select(func.sum(Penalty.payment).label('sum_payment'),
+                   func.count(Penalty.payment).label('cnt'))
+            .join(BookReader, Penalty.id_book_reader == BookReader.id_book_reader)
+            .join(Readers, BookReader.reader_ticket == Readers.reader_ticket)
+            .where(Readers.reader_ticket == reader_id)
+        )
+        result = await session.execute(query)
+
+        rows = result.fetchall()  # Получаем все строки
+        sum = rows[0][0]
+        if (rows[0][0] == None):
+            sum = 0
+        print(f"ROWS {rows}")
+        return {
+                "sum_payment": sum,
+                "cnt_payment": rows[0][1]
+            }
 
     async def create_reader(
             self,
@@ -156,3 +181,17 @@ class ReadersRepository:
             raise ReaderAlreadyExists()
 
         return ReaderInDB.model_validate(obj=created_reader)
+
+    async def get_penalty(
+            self,
+            session: AsyncSession,
+            reader_id : int
+    ) -> list[PenaltySchema]:
+        query = (
+            select(Penalty.id_book_reader, Penalty.start_time, Penalty.payment)
+            .join(BookReader, BookReader.id_book_reader == Penalty.id_book_reader)
+            .where(BookReader.reader_ticket == reader_id)
+        )
+        result = await session.execute(query)
+
+        return [PenaltySchema.model_validate(obj=val) for val in result.all()]

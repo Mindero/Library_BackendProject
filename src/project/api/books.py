@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, HTTPException, status, Depends
 
@@ -17,7 +17,6 @@ async def get_all_books() -> list[BookSchema]:
         all_book = await book_repo.get_all_books(session=session)
 
     return all_book
-
 
 @router.post("/add_book", response_model=BookSchema, status_code=status.HTTP_201_CREATED)
 async def add_book(

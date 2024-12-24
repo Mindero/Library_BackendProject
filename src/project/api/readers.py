@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
+from project.schemas.penaltySchema import PenaltySchema
 from src.project.api.authorization.hash import oauth2_scheme_login
 from src.project.api.authorization.token_service import create_access_token
 from src.project.core.config import settings
@@ -13,13 +14,14 @@ from src.project.schemas.tokenSchema import Token
 from src.project.api.depends import database, reader_repo, get_current_reader, RoleChecker
 from src.project.core.exceptions.ReaderExceptions import ReaderNotFound, ReaderAlreadyExists
 from src.project.schemas.readerInDB import ReaderInDB, ReaderCreateUpdateSchema, ReaderLoginSchema, \
-    ReaderRegisterSchema, ReaderAdminCreateSchema
+    ReaderRegisterSchema, ReaderAdminCreateSchema, ReaderInDbWithPenalty
 
 router = APIRouter()
 
 
 @router.get("/all_readers", response_model=list[ReaderInDB])
-async def get_all_readers(_: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]) -> list[ReaderInDB]:
+async def get_all_readers(_: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))]) -> list[
+    ReaderInDB]:
     async with database.session() as session:
         await reader_repo.check_connection(session=session)
         all_readers = await reader_repo.get_all_readers(session=session)
@@ -27,11 +29,26 @@ async def get_all_readers(_: Annotated[bool, Depends(RoleChecker(allowed_roles=[
     return all_readers
 
 
-@router.get("/{reader_id}",
-            response_model=ReaderInDB,
+@router.get("/get_reader/{reader_id}",
+            response_model=ReaderInDbWithPenalty,
             status_code=status.HTTP_200_OK)
-async def get_reader_by_id(reader: ReaderInDB = Depends(get_current_reader)) -> ReaderInDB:
-    return reader
+async def get_reader_by_id(reader: ReaderInDB = Depends(get_current_reader)
+                           ) -> ReaderInDbWithPenalty:
+    async with database.session() as session:
+        penalty = await reader_repo.get_penalty_by_id(session=session, reader_id=reader.reader_ticket)
+    print(penalty)
+    res = ReaderInDbWithPenalty(
+        reader_ticket=reader.reader_ticket,
+        name=reader.name,
+        email=reader.email,
+        phone_number=reader.phone_number,
+        password=reader.password,
+        created_date=reader.created_date,
+        role=reader.role,
+        sum_payment=penalty['sum_payment'],
+        cnt_payment=penalty['cnt_payment']
+    )
+    return res
 
 
 @router.post("/add_reader", response_model=ReaderInDB, status_code=status.HTTP_201_CREATED)
@@ -106,3 +123,9 @@ async def register_reader(registerDto: ReaderRegisterSchema) -> None:
     except BaseException as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.args)
 
+
+@router.get("/get_penalty/{reader_id}", status_code=status.HTTP_200_OK)
+async def get_penalty(reader: ReaderInDB = Depends(get_current_reader)) -> list[PenaltySchema]:
+    async with database.session() as session:
+        res = await reader_repo.get_penalty(session=session, reader_id=reader.reader_ticket)
+    return res

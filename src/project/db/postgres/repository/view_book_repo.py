@@ -1,5 +1,5 @@
 import itertools
-from typing import Type
+from typing import Type, Optional
 import asyncio
 from sqlalchemy import text, select, insert, update, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession

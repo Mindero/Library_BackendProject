@@ -4,6 +4,7 @@ from sqlalchemy import text, update, delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
+from project.schemas.penaltySchema import PenaltySchema
 from src.project.core.config import settings
 from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
@@ -145,7 +146,7 @@ class BookReaderRepository:
             reader_id: int
     ):
         query = (
-            select(Books.name, Books.id_book, BookReader.id_instance, BookReader.borrow_date, BookReader.end_date)
+            select(BookReader.id_book_reader, Books.name, Books.id_book, BookReader.id_instance, BookReader.borrow_date, BookReader.end_date)
             .join(BookInstance, BookInstance.id_instance == BookReader.id_instance)
             .join(BookPublisher, BookPublisher.id_book_publisher == BookInstance.id_book_publisher)
             .join(Books, Books.id_book == BookPublisher.id_book)
@@ -156,10 +157,12 @@ class BookReaderRepository:
 
         return [
             {
-                "book_name": row[0],
-                "id_book": row[1],
-                "id_instance": row[2],
-                "borrow_date": row[3],
-                "end_date": row[4]
+                "id_book_reader": row[0],
+                "book_name": row[1],
+                "id_book": row[2],
+                "id_instance": row[3],
+                "borrow_date": row[4],
+                "end_date": row[5]
             }
             for row in result]
+

@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict
 
 class GenreCreateUpdateSchema(BaseModel):
     name: str
+    url: str
 
 
 class GenreSchema(GenreCreateUpdateSchema):

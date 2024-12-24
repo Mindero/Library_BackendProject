@@ -1,11 +1,11 @@
-from typing import Type
+from typing import Type, Optional
 
 from sqlalchemy import text, select, insert, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.project.models import Authors, AuthorsBook
 from src.project.core.exceptions.BookExceptions import BookNotFound
-from src.project.models import Books
+from src.project.models import Books, BookGenres, Genres
 from src.project.schemas.bookSchema import BookSchema, BookCreateUpdateSchema
 
 
@@ -25,8 +25,23 @@ class BooksRepository:
     async def get_all_books(
             self,
             session: AsyncSession,
+            genre: Optional[str] = None,
+            name: Optional[str] = None,
+            year_left: Optional[int] = None,
+            year_right: Optional[int] = None,
     ) -> list[BookSchema]:
         query = select(self._collection)
+
+        if genre:
+            query = (query.join(BookGenres, BookGenres.id_book == Books.id_book)
+                          .join(Genres, Genres.id_genre == BookGenres.id_genre)
+                          .filter(Genres.name == genre))
+        if name:
+            query = query.filter(Books.name.ilike(f"{name}%"))
+        if year_left:
+            query = query.filter(Books.year >= year_left)
+        if year_right:
+            query = query.filter(Books.year <= year_right)
 
         books = await session.scalars(query)
 

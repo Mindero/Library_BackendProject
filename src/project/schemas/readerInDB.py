@@ -38,3 +38,7 @@ class ReaderInDB(ReaderSchema):
 
     reader_ticket: int
     role: Role
+
+class ReaderInDbWithPenalty(ReaderInDB):
+    sum_payment: int
+    cnt_payment: int

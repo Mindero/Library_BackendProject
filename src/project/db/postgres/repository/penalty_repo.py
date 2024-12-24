@@ -1,13 +1,13 @@
 from typing import Type
 
-from sqlalchemy import text, insert, update, delete, select
+from sqlalchemy import text, insert, update, delete, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
 from src.project.core.exceptions.PenaltyExceptions import PenaltyNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
-from src.project.models import Penalty
-from src.project.schemas.penaltySchema import PenaltySchema, PenaltyCreateUpdateSchema
+from src.project.models import Penalty, Readers, BookReader
+from src.project.schemas.penaltySchema import PenaltySchema, PenaltyCreateUpdateSchema, PenaltyReaderSchema
 
 
 class PenaltyRepository:
@@ -32,6 +32,37 @@ class PenaltyRepository:
         penalty = await session.scalars(query)
 
         return [PenaltySchema.model_validate(obj=val) for val in penalty.all()]
+
+    async def get_all_readers(
+            self,
+            session: AsyncSession,
+    ):
+        query = (
+            select(Readers.reader_ticket,
+                   Readers.name,
+                   Readers.phone_number,
+                   Readers.email,
+                   func.sum(Penalty.payment).label('sum_payment'),
+                   func.count(Penalty.payment).label('cnt'))
+            .join(BookReader, Penalty.id_book_reader == BookReader.id_book_reader)
+            .join(Readers, BookReader.reader_ticket == Readers.reader_ticket)
+            .group_by(Readers.reader_ticket, Readers.name, Readers.phone_number, Readers.email)
+        )
+        result = await session.execute(query)
+
+        rows = result.fetchall()  # Получаем все строки
+
+        return [
+            PenaltyReaderSchema(
+                reader_ticket=row[0],
+                name=row[1],
+                phone_number=row[2],
+                email=row[3],
+                sum_payment=row[4],
+                cnt=row[5]
+            )
+            for row in rows
+        ]
 
     async def get_by_id(
             self,

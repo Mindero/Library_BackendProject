@@ -8,3 +8,4 @@ class Genres(Base):
 
     id_genre: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
+    url: Mapped[str] = mapped_column(nullable=False, unique=True)

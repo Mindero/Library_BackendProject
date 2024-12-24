@@ -23,6 +23,16 @@ async def get_all_penalty(
 
     return all_penalty
 
+@router.get("/get_all_readers")
+async def get_all_penalty(
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))],
+):
+    async with database.session() as session:
+        await penalty_repo.check_connection(session=session)
+        all_penalty = await penalty_repo.get_all_readers(session=session)
+
+    return all_penalty
+
 
 @router.get("/{penalty_id}", response_model=PenaltySchema)
 async def get_penalty_by_id(

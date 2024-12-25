@@ -58,6 +58,7 @@ class RoleChecker:
         self.allowed_roles = allowed_roles
 
     def __call__(self, reader: Annotated[ReaderInDB, Depends(get_current_reader)]):
+        print(f"reader_role = {reader.role}")
         if reader.role.value in self.allowed_roles:
             return True
         raise HTTPException(

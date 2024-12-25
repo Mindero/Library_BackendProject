@@ -16,6 +16,7 @@ async def get_all_view_books(
         name: Optional[str] = None,
         year_left: Optional[int] = None,
         year_right: Optional[int] = None,
+        available: Optional[bool] = False,
 ) -> list[ViewBookSchema]:
     async with database.session() as session:
         all_books_id = await book_repo.get_all_books(
@@ -23,7 +24,8 @@ async def get_all_view_books(
             genre=genre,
             name=name,
             year_left=year_left,
-            year_right=year_right
+            year_right=year_right,
+            available=available
         )
         tasks = [
             viewBook_repo.get_view_books_by_book_id(session=session, id_book=book.id_book)

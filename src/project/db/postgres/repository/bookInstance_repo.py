@@ -205,3 +205,57 @@ class BookInstanceRepository:
         res = [dict(row) for row in result.mappings()]
 
         return res
+
+    from sqlalchemy import delete
+
+    async def delete_supply_books(
+            self,
+            session: AsyncSession,
+            id_book: int,
+            supply_date: date,
+            publisher_name: str,
+    ):
+        VIEW = metadata.tables[f"{settings.POSTGRES_SCHEMA}.supply_view"]
+
+        # Создание условия для удаления записей
+        delete_query = delete(VIEW).where(
+            VIEW.c.id_book == id_book,
+            VIEW.c.supply_date == supply_date,
+            VIEW.c.publisher_name == publisher_name
+        )
+
+        # Выполнение запроса
+        await session.execute(delete_query)
+
+        # Подтверждение изменений
+        await session.commit()
+
+    async def create_supply_books(
+            self,
+            session: AsyncSession,
+            book_name: str,
+            publisher_name: str,
+            supply_date: date,
+            count: int
+    ):
+        VIEW = metadata.tables[f"{settings.POSTGRES_SCHEMA}.supply_view"]
+
+        # Создание условия для удаления записей
+        for i in range(count):
+            query = (
+                insert(VIEW)
+                .values(
+                    book_name=book_name,
+                    publisher_name=publisher_name,
+                    supply_date=supply_date,
+                )
+            )
+
+            print(f"query = {query}")
+
+            await session.execute(query)
+
+        # Подтверждение изменений
+        await session.commit()
+
+        return True

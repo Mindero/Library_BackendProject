@@ -2,6 +2,7 @@ from datetime import date
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, HTTPException, status, Depends
+from pydantic import BaseModel
 
 from project.core.exceptions.BookExceptions import BookNotFound
 from src.project.api.depends import database, bookInstance_repo, RoleChecker
@@ -127,5 +128,42 @@ async def get_supply_books(
             end_date=end_date,
             book_name=book_name,
             author_name=author_name,
+        )
+    return result
+
+@router.delete("/delete_supply_books", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_supply_books(
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))],
+        id_book: int,
+        supply_date: date,
+        publisher_name: str,
+):
+    async with database.session() as session:
+        result = await bookInstance_repo.delete_supply_books(
+            session=session,
+            id_book=id_book,
+            supply_date=supply_date,
+            publisher_name=publisher_name,
+        )
+    return result
+
+class SupplyBookRequest(BaseModel):
+    book_name: str
+    publisher_name: str
+    supply_date: date
+    count: int
+
+@router.post("/create_supply_books", status_code=status.HTTP_201_CREATED)
+async def create_supply_books(
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))],
+        request: SupplyBookRequest
+):
+    async with database.session() as session:
+        result = await bookInstance_repo.create_supply_books(
+            session=session,
+            book_name=request.book_name,
+            supply_date=request.supply_date,
+            publisher_name=request.publisher_name,
+            count=request.count
         )
     return result

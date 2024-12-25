@@ -3,9 +3,8 @@ from typing import Type, Optional
 from sqlalchemy import text, select, insert, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.project.models import Authors, AuthorsBook
 from src.project.core.exceptions.BookExceptions import BookNotFound
-from src.project.models import Books, BookGenres, Genres
+from src.project.models import Books, BookGenres, Genres, BookPublisher, BookInstance, Authors, AuthorsBook
 from src.project.schemas.bookSchema import BookSchema, BookCreateUpdateSchema
 
 
@@ -29,6 +28,7 @@ class BooksRepository:
             name: Optional[str] = None,
             year_left: Optional[int] = None,
             year_right: Optional[int] = None,
+            available: Optional[bool] = False,
     ) -> list[BookSchema]:
         query = select(self._collection)
 
@@ -42,7 +42,10 @@ class BooksRepository:
             query = query.filter(Books.year >= year_left)
         if year_right:
             query = query.filter(Books.year <= year_right)
-
+        if available:
+            query = (query.join(BookPublisher, BookPublisher.id_book == Books.id_book)
+                          .join(BookInstance, BookInstance.id_book_publisher == BookPublisher.id_book_publisher)
+                          .filter(BookInstance.taken_now == False))
         books = await session.scalars(query)
 
         return [BookSchema.model_validate(obj=book) for book in books.all()]

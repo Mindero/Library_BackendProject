@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from project.core.config import settings
 from project.db.postgres.database import metadata
-from project.schemas.views.viewBookSchema import ViewBookSchema
+from project.schemas.views.viewBookSchema import ViewBookSchema, ViewBookWithoutAuthorsSchema
 
 
 class ViewBookRepository:
@@ -108,26 +108,20 @@ class ViewBookRepository:
             self,
             session: AsyncSession,
             author_id: int,
-    ) -> list[ViewBookSchema]:
+    ) -> list[ViewBookWithoutAuthorsSchema]:
         VIEW = metadata.tables[f"{settings.POSTGRES_SCHEMA}.view_book"]
 
         # Выполняем запрос для получения всех id книг для данного автора
-        query = select(VIEW.c.id_book).where(VIEW.c.id_author == author_id)
+        query = select(VIEW.c.id_book,
+                       VIEW.c.book_name,
+                       VIEW.c.book_year).where(VIEW.c.id_author == author_id)
         result = await session.execute(query)
 
-        view_id_books = result.scalars().all()
-
-        # Создаем список асинхронных операций для получения книг и их авторов
-        # Запускаем асинхронные операции параллельно
-        tasks = [
-            self.get_view_books_by_book_id(session=session, id_book=id_book)
-            for id_book in view_id_books
+        return [
+            ViewBookWithoutAuthorsSchema(
+                id_book=row[0],
+                book_name=row[1],
+                book_year=row[2],
+            )
+            for row in result.all()
         ]
-
-        # Ожидаем выполнения всех задач
-        view_books_nested = await asyncio.gather(*tasks)
-
-        # Разворачиваем вложенные списки в один список
-        view_books = list(itertools.chain.from_iterable(view_books_nested))
-        print(f"VIEW_BOOKS: {view_books}")
-        return view_books

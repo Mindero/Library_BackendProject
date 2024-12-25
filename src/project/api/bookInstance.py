@@ -1,4 +1,5 @@
-from typing import Annotated
+from datetime import date
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, HTTPException, status, Depends
 
@@ -31,7 +32,7 @@ async def get_all_book_instance() -> list[BookInstanceSchema]:
     return all_book_instance
 
 
-@router.get("/{bookInstance_id}", response_model=BookInstanceSchema)
+@router.get("/get_by_id/{bookInstance_id}", response_model=BookInstanceSchema)
 async def get_bookInstance_by_id(bookInstance_id: int) -> BookInstanceSchema:
     try:
         async with database.session() as session:
@@ -109,3 +110,22 @@ async def get_available_instances_by_book_id(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
 
     return instances
+
+
+@router.get("/get_supply_books", status_code=status.HTTP_200_OK)
+async def get_supply_books(
+        _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))],
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        book_name: Optional[str] = None,
+        author_name: Optional[str] = None,
+):
+    async with database.session() as session:
+        result = await bookInstance_repo.get_supply_books(
+            session=session,
+            start_date=start_date,
+            end_date=end_date,
+            book_name=book_name,
+            author_name=author_name,
+        )
+    return result

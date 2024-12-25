@@ -1,10 +1,13 @@
-from typing import Type
+from datetime import date
+from typing import Type, Optional
 
-from sqlalchemy import text, insert, update, delete, select
+from sqlalchemy import text, insert, update, delete, select, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
+from project.core.config import settings
 from project.core.exceptions.BookExceptions import BookNotFound
+from project.db.postgres.database import metadata
 from src.project.core.exceptions.BookInstanceExceptions import BookInstanceNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 from src.project.models import BookInstance, Publishers, BookPublisher, Books
@@ -159,3 +162,46 @@ class BookInstanceRepository:
                 for row in res]
         else:
             return []
+
+    async def get_supply_books(
+            self,
+            session: AsyncSession,
+            start_date: Optional[date] = None,
+            end_date: Optional[date] = None,
+            book_name: Optional[str] = None,
+            author_name: Optional[str] = None,
+    ):
+        VIEW = metadata.tables[f"{settings.POSTGRES_SCHEMA}.supply_view"]
+        query = select(
+            VIEW.c.id_book,
+            VIEW.c.book_name,
+            VIEW.c.publisher_name,
+            VIEW.c.supply_date,
+            func.count(func.distinct(VIEW.c.id_instance)).label('count'),
+            func.array_agg(
+                func.jsonb_build_object('id_author', VIEW.c.id_author, 'name', VIEW.c.author_name)
+            ).label('authors')
+        ).group_by(
+            VIEW.c.id_book, VIEW.c.book_name, VIEW.c.publisher_name, VIEW.c.supply_date  # Группируем по нужным полям
+        )
+        conditions = []
+
+        if start_date:
+            conditions.append(VIEW.c.supply_date >= start_date)
+        if end_date:
+            conditions.append(VIEW.c.supply_date <= end_date)
+        if book_name:
+            conditions.append(VIEW.c.book_name.ilike(f"{book_name}%"))
+        if author_name:
+            conditions.append(VIEW.c.author_name.ilike(f"{author_name}%"))
+
+        if conditions:
+            query = query.where(and_(*conditions))
+
+        # print(f"query = {query}")
+
+        result = await session.execute(query)
+
+        res = [dict(row) for row in result.mappings()]
+
+        return res

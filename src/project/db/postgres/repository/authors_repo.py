@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Optional
 
 from sqlalchemy import text, select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,12 +14,29 @@ class AuthorsRepository:
     async def get_all_authors(
             self,
             session: AsyncSession,
+            name: Optional[str] = None,
+            country: Optional[str] = None,
     ) -> list[AuthorSchema]:
         query = select(self._collection)
+        if name:
+            query = (query.filter(Authors.name.ilike(f"{name}%")))
+        if country:
+            query = (query.filter(Authors.country == country))
 
         authors = await session.scalars(query)
 
         return [AuthorSchema.model_validate(obj=author) for author in authors.all()]
+
+
+    async def get_all_countries(
+            self,
+            session: AsyncSession,
+    ) -> list[str]:
+        query = select(Authors.country).distinct()
+
+        authors = await session.scalars(query)
+
+        return [author for author in authors.all()]
 
     async def create_author(
             self,

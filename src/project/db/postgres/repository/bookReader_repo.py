@@ -1,9 +1,11 @@
-from typing import Type
+from datetime import date
+from typing import Type, Optional
 
-from sqlalchemy import text, update, delete, insert, select
+from sqlalchemy import text, update, delete, insert, select, cast, String, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
+from project.db.postgres.database import metadata
 from project.schemas.penaltySchema import PenaltySchema
 from src.project.core.config import settings
 from src.project.core.exceptions.BookReaderExceptions import BookReaderNotFound
@@ -166,3 +168,44 @@ class BookReaderRepository:
             }
             for row in result]
 
+    async def get_all_orders(
+            self,
+            session: AsyncSession,
+            reader_name: Optional[str] = None,
+            reader_email: Optional[str] = None,
+            reader_ticket: Optional[int] = None,
+            book_name: Optional[str] = None,
+            publisher_name: Optional[str] = None,
+            borrow_date: Optional[date] = None,
+            end_date: Optional[date] = None,
+    ):
+        VIEW = metadata.tables[f"{settings.POSTGRES_SCHEMA}.order_view"]
+
+        query = select(VIEW)
+        conditions = []
+
+        if reader_name:
+            conditions.append(VIEW.c.reader_name.ilike(f"{reader_name}%"))
+        if reader_email:
+            conditions.append(VIEW.c.reader_email.ilike(f"{reader_email}%"))
+        if reader_ticket:
+            conditions.append(cast(VIEW.c.reader_ticket, String).ilike(f"{reader_ticket}%"))
+        if book_name:
+            conditions.append(VIEW.c.book_name.ilike(f"{book_name}%"))
+        if publisher_name:
+            conditions.append(VIEW.c.publisher_name.ilike(f"{publisher_name}%"))
+        if borrow_date:
+            conditions.append(VIEW.c.borrow_date >= borrow_date)
+        if end_date:
+            conditions.append(VIEW.c.end_date <= end_date)
+
+        if conditions:
+            query = query.where(and_(*conditions))
+
+        # print(f"query = {query}")
+
+        result = await session.execute(query)
+
+        res = [dict(row) for row in result.mappings()]
+
+        return res

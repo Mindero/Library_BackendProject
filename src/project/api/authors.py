@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, HTTPException, status, Depends
 
@@ -11,11 +11,27 @@ router = APIRouter()
 
 
 @router.get("/all_authors", response_model=list[AuthorSchema])
-async def get_all_authors() -> list[AuthorSchema]:
+async def get_all_authors(
+        name: Optional[str] = None,
+        country: Optional[str] = None
+) -> list[AuthorSchema]:
     async with database.session() as session:
-        all_author = await author_repo.get_all_authors(session=session)
+        all_author = await author_repo.get_all_authors(
+            session=session,
+            name=name,
+            country=country
+        )
 
     return all_author
+
+@router.get("/all_countries", response_model=list[str])
+async def get_all_countries() -> list[AuthorSchema]:
+    async with database.session() as session:
+        all_countries = await author_repo.get_all_countries(
+            session=session,
+        )
+
+    return all_countries
 
 
 @router.get("/{author_id}", response_model=AuthorSchema)

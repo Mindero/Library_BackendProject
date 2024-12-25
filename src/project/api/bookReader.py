@@ -1,4 +1,5 @@
-from typing import Annotated
+from datetime import date
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, status, HTTPException, Depends
 
@@ -33,7 +34,34 @@ async def get_all_view_book_reader(
 
     return all_book_reader
 
-@router.get("/{bookReader_id}", response_model=BookReaderSchema)
+@router.get("/all_orders", status_code=status.HTTP_200_OK)
+async def get_all_orders(
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))],
+    reader_name: Optional[str] = None,
+    reader_email: Optional[str] = None,
+    reader_ticket: Optional[int] = None,
+    book_name: Optional[str] = None,
+    publisher_name: Optional[str] = None,
+    borrow_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+):
+    async with database.session() as session:
+        await bookReader_repo.check_connection(session=session)
+        all_book_reader = await bookReader_repo.get_all_orders(
+            session=session,
+            reader_name=reader_name,
+            reader_email=reader_email,
+            reader_ticket=reader_ticket,
+            book_name=book_name,
+            publisher_name=publisher_name,
+            borrow_date=borrow_date,
+            end_date=end_date,
+        )
+
+    return all_book_reader
+
+
+@router.get("/get_by_id/{bookReader_id}", response_model=BookReaderSchema)
 async def get_bookReader_by_id(
         bookReader_id: int,
         reader: ReaderInDB = Depends(get_current_reader)

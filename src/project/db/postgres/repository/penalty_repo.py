@@ -1,9 +1,11 @@
-from typing import Type
+from typing import Type, Optional
 
-from sqlalchemy import text, insert, update, delete, select, func
+from sqlalchemy import text, insert, update, delete, select, func, cast, String, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
+from project.core.config import settings
+from project.db.postgres.database import metadata
 from src.project.core.exceptions.PenaltyExceptions import PenaltyNotFound
 from src.project.core.exceptions.ForeignKeyNotFound import ForeignKeyNotFound
 from src.project.models import Penalty, Readers, BookReader
@@ -63,6 +65,58 @@ class PenaltyRepository:
             )
             for row in rows
         ]
+
+    async def get_all_view_penalty(
+            self,
+            session: AsyncSession,
+            reader_name: Optional[str] = None,
+            reader_email: Optional[str] = None,
+            reader_ticket: Optional[int] = None,
+    ):
+        VIEW = metadata.tables[f"{settings.POSTGRES_SCHEMA}.penalty_view"]
+        print(VIEW.columns)
+        query = (
+            select(
+                VIEW.c.reader_ticket,
+                VIEW.c.reader_name,
+                VIEW.c.reader_email,
+                func.count(VIEW.c.id_book_reader).label('count_penalty'),
+                func.sum(VIEW.c.payment).label('sum_penalty'),
+                func.array_agg(
+                    func.jsonb_build_object(
+                        'id_book', VIEW.c.id_book,
+                        'id_book_reader', VIEW.c.id_book_reader,
+                        'book_name', VIEW.c.book_name,
+                        'publisher_name', VIEW.c.publisher_name,
+                        'id_instance', VIEW.c.id_instance,
+                        'start_time', VIEW.c.start_time,
+                        'payment', VIEW.c.payment
+                    )
+                ).label("books")
+            ).group_by(
+                VIEW.c.reader_ticket, VIEW.c.reader_name, VIEW.c.reader_email,
+                VIEW.c.id_book, VIEW.c.id_book_reader, VIEW.c.book_name,
+                VIEW.c.publisher_name, VIEW.c.id_instance, VIEW.c.start_time,
+                VIEW.c.payment
+            ))
+        conditions = []
+
+        if reader_name:
+            conditions.append(VIEW.c.reader_name.ilike(f"{reader_name}%"))
+        if reader_email:
+            conditions.append(VIEW.c.reader_email.ilike(f"{reader_email}%"))
+        if reader_ticket:
+            conditions.append(cast(VIEW.c.reader_ticket, String).ilike(f"{reader_ticket}%"))
+
+        if conditions:
+            query = query.where(and_(*conditions))
+
+        result = await session.execute(query)
+
+        res = [dict(row) for row in result.mappings()]
+
+        print(f"res = {res}")
+        return res
 
     async def get_by_id(
             self,

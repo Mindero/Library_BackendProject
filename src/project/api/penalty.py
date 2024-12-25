@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, HTTPException, status, Depends
 
@@ -20,6 +20,24 @@ async def get_all_penalty(
     async with database.session() as session:
         await penalty_repo.check_connection(session=session)
         all_penalty = await penalty_repo.get_all_penalty(session=session)
+
+    return all_penalty
+
+@router.get("/all_view_penalty")
+async def get_all_penalty(
+    _: Annotated[bool, Depends(RoleChecker(allowed_roles=[Role.ADMIN.value]))],
+    reader_name: Optional[str] = None,
+    reader_email: Optional[str] = None,
+    reader_ticket: Optional[int] = None,
+):
+    async with database.session() as session:
+        await penalty_repo.check_connection(session=session)
+        all_penalty = await penalty_repo.get_all_view_penalty(
+            session=session,
+            reader_name=reader_name,
+            reader_email=reader_email,
+            reader_ticket=reader_ticket
+        )
 
     return all_penalty
 

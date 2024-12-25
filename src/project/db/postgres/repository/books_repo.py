@@ -126,7 +126,7 @@ class BooksRepository:
         if res:
             return {
                 "book_name": res[0][0],
-                "authors": [{"id": row[1], "name": row[2]} for row in res]
+                "authors": [{"id_author": row[1], "name": row[2]} for row in res]
             }
         else:
             raise BookNotFound(id_book)

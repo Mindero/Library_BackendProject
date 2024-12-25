@@ -10,3 +10,10 @@ class ViewBookSchema(BaseModel):
     book_name: str
     book_year: int
     authors: List[dict]  # (name id)
+
+class ViewBookWithoutAuthorsSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id_book: int
+    book_name: str
+    book_year: int

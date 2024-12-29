@@ -84,7 +84,7 @@ class ViewBookRepository:
             VIEW.c.book_name,
             VIEW.c.book_year,
             func.array_agg(
-                func.jsonb_build_object('id', VIEW.c.id_author, 'name', VIEW.c.author_name)
+                func.jsonb_build_object('id_author', VIEW.c.id_author, 'name', VIEW.c.author_name)
             ).label('authors')
         ).where(VIEW.c.id_book == id_book).group_by(
             VIEW.c.id_book, VIEW.c.book_name, VIEW.c.book_year

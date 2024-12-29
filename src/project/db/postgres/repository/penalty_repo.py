@@ -95,9 +95,6 @@ class PenaltyRepository:
                 ).label("books")
             ).group_by(
                 VIEW.c.reader_ticket, VIEW.c.reader_name, VIEW.c.reader_email,
-                VIEW.c.id_book, VIEW.c.id_book_reader, VIEW.c.book_name,
-                VIEW.c.publisher_name, VIEW.c.id_instance, VIEW.c.start_time,
-                VIEW.c.payment
             ))
         conditions = []
 
